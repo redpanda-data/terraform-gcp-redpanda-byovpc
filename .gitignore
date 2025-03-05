@@ -32,3 +32,8 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+.idea/modules.xml
+.idea/terraform-gcp-redpanda-byovpc.iml
+.idea/terraform.xml
+.idea/vcs.xml
+examples/.terraform.lock.hcl
