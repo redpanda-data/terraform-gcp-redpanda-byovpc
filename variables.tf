@@ -1,118 +1,53 @@
-variable "host_project_id" {
-  description = "The ID of the host project where shared VPC exists"
+variable "project_id" {
   type        = string
-}
-
-variable "service_project_id" {
-  description = "The ID of the service project to enable services in"
-  type        = string
-}
-
-variable "shared_vpc_name" {
-  description = "The name of the shared VPC network"
-  type        = string
+  description = <<-HELP
+  The project id
+  HELP
 }
 
 variable "region" {
-  description = "The region to deploy resources to"
   type        = string
+  description = <<-HELP
+  The region where the VPC lives. Required.
+  HELP
 }
 
-variable "primary_subnet_name" {
-  description = "The name for the primary subnet"
+variable "service_project_id" {
   type        = string
+  description = <<-HELP
+  The service project id
+  HELP
 }
 
-variable "secondary_ipv4_range_name_for_pods" {
-  description = "The name for the secondary IPv4 range for pods"
-  type        = string
+variable "enable_private_link" {
+  type        = bool
+  default     = false
+  description = <<-HELP
+  toggle the creation of Private Link/ PSC-related resources
+  HELP
 }
 
-variable "secondary_ipv4_range_name_for_services" {
-  description = "The name for the secondary IPv4 range for services"
+variable "psc_nat_subnet_ipv4_range" {
   type        = string
+  default     = "10.0.2.0/29"
+  description = <<-HELP
+  The IPv4 CIDR range of the PSC NAT subnet
+  HELP
 }
 
-variable "router_name" {
-  description = "The name for the Cloud Router"
+variable "unique_identifier" {
   type        = string
+  default     = ""
+  description = <<-HELP
+  If you intend to run multiple copies of this terraform you will need to provide a distinguishing string so that the
+  resources created will not have naming conflicts.
+  HELP
 }
 
-variable "nat_config_name" {
-  description = "The name for the Cloud NAT configuration"
-  type        = string
-}
-
-variable "address_name" {
-  description = "The name for the NAT external IP address"
-  type        = string
-}
-
-variable "gke_master_cidr_range" {
-  description = "The CIDR range for GKE master"
-  type        = string
-}
-
-variable "tiered_storage_bucket_name" {
-  description = "The name for the tiered storage bucket"
-  type        = string
-}
-
-variable "management_storage_bucket_name" {
-  description = "The name for the management storage bucket"
-  type        = string
-}
-
-variable "redpanda_cluster_sa_name" {
-  description = "Account ID for the Redpanda cluster service account"
-  type        = string
-  default     = "redpanda-cluster"
-}
-
-variable "redpanda_console_sa_name" {
-  description = "Account ID for the Redpanda console service account"
-  type        = string
-  default     = "redpanda-console"
-}
-
-variable "redpanda_connectors_sa_name" {
-  description = "Account ID for the Redpanda connectors service account"
-  type        = string
-  default     = "redpanda-connectors"
-}
-
-variable "redpanda_gke_sa_name" {
-  description = "Account ID for the Redpanda GKE service account"
-  type        = string
-  default     = "redpanda-gke"
-}
-
-variable "kubernetes_namespace_redpanda" {
-  description = "Kubernetes namespace for Redpanda resources"
-  type        = string
-  default     = "redpanda"
-}
-
-variable "kubernetes_namespace_connectors" {
-  description = "Kubernetes namespace for Redpanda connectors"
-  type        = string
-  default     = "redpanda-connectors"
-}
-
-variable "kubernetes_namespace_cert_manager" {
-  description = "Kubernetes namespace for cert-manager"
-  type        = string
-  default     = "cert-manager"
-}
-
-variable "kubernetes_namespace_external_dns" {
-  description = "Kubernetes namespace for external-dns"
-  type        = string
-  default     = "external-dns"
-}
-
-variable "kubernetes_namespace_psc" {
-  description = "Kubernetes namespace for PSC controller"
-  type        = string
-  default     = "redpanda-psc"
+variable "attach_shared_vpc" {
+  type        = bool
+  default     = true
+  description = <<-HELP
+  When true will create the shared_vpc_host_project and shared_vpc_service_project attachments.
+  HELP
 }
