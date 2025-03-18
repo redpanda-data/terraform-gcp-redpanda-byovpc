@@ -16,12 +16,6 @@ resource "google_project_service" "storage_api" {
   disable_on_destroy         = false
 }
 
-resource "google_project_service" "container_api" {
-  service                    = "container.googleapis.com"
-  disable_dependent_services = false
-  disable_on_destroy         = false
-}
-
 resource "google_project_service" "cloud_resource_manager_api" {
   service                    = "cloudresourcemanager.googleapis.com"
   disable_dependent_services = false
@@ -42,6 +36,12 @@ resource "google_project_service" "secret_manager_api" {
 
 resource "google_project_service" "service_usage" {
   service                    = "serviceusage.googleapis.com"
+  disable_dependent_services = false
+  disable_on_destroy         = false
+}
+
+resource "google_project_service" "container_api" {
+  service                    = "container.googleapis.com"
   disable_dependent_services = false
   disable_on_destroy         = false
 }

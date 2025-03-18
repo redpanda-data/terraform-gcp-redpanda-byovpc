@@ -1,20 +1,3 @@
-locals {
-  create_shared_vpc = (var.project_id != var.service_project_id)
-  postfix           = var.unique_identifier != "" ? "-${var.unique_identifier}" : ""
-}
-
-resource "google_project_service" "compute_api" {
-  service                    = "compute.googleapis.com"
-  disable_dependent_services = false
-  disable_on_destroy         = false
-}
-
-resource "google_project_service" "container_api" {
-  service                    = "container.googleapis.com"
-  disable_dependent_services = false
-  disable_on_destroy         = false
-}
-
 resource "google_compute_shared_vpc_host_project" "host" {
   count   = local.create_shared_vpc && var.attach_shared_vpc ? 1 : 0
   project = var.project_id
