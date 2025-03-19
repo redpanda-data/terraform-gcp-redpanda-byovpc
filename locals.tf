@@ -1,7 +1,5 @@
 locals {
-  create_shared_vpc = (var.project_id != var.service_project_id)
   postfix = var.unique_identifier != "" ? "-${var.unique_identifier}" : ""
-  using_shared_vpc = (var.project_id != var.network_project_id)
   agent_permissions = var.enable_private_link ? concat(local.basic_agent_permissions, local.psc_agent_permissions) : local.basic_agent_permissions
   psc_agent_permissions = [
     "compute.subnetworks.use",

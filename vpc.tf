@@ -1,12 +1,12 @@
 resource "google_compute_shared_vpc_host_project" "host" {
-  count   = local.create_shared_vpc && var.attach_shared_vpc ? 1 : 0
-  project = var.project_id
+  count  = var.create_shared_vpc && var.attach_shared_vpc ? 1 : 0
+  project = var.host_project_id
 }
 
 resource "google_compute_shared_vpc_service_project" "service_project" {
-  count           = local.create_shared_vpc && var.attach_shared_vpc ? 1 : 0
+  count           = var.create_shared_vpc != "" && var.attach_shared_vpc ? 1 : 0
   host_project    = google_compute_shared_vpc_host_project.host[0].project
-  service_project = var.service_project_id
+  service_project = var.shared_project_id
 }
 
 resource "google_compute_network" "redpanda" {
@@ -109,7 +109,7 @@ resource "google_compute_subnetwork_iam_policy" "nat_subnet_policy" {
 
 data "google_project" "service_project" {
   count      = local.create_shared_vpc ? 1 : 0
-  project_id = var.service_project_id
+  project_id = var.shared_project_id
 }
 
 data "google_iam_policy" "subnetwork_iam" {
@@ -128,8 +128,8 @@ data "google_iam_policy" "subnetwork_iam" {
 # without this permission the gcp-redpanda-infra provisioner will be unable to create the k8s cluster (because the k8s
 # cluster specifies that it belongs to this shared network, it needs to be able to 'use' that network)
 resource "google_project_iam_binding" "gke_hostagent_iam" {
-  count   = local.create_shared_vpc && var.attach_shared_vpc ? 1 : 0
-  project = var.project_id
+  count   = var.create_shared_vpc && var.attach_shared_vpc ? 1 : 0
+  project = var.host_project_id
   role    = "roles/container.hostServiceAgentUser"
   members = [
     "serviceAccount:service-${data.google_project.service_project[0].number}@container-engine-robot.iam.gserviceaccount.com",
@@ -141,8 +141,8 @@ resource "google_project_iam_binding" "gke_hostagent_iam" {
 
 # without this permission, the CreateCluster will succeeded, but not all of the required firewalls will be created
 resource "google_project_iam_binding" "gke_firewall_iam" {
-  count   = local.create_shared_vpc && var.attach_shared_vpc ? 1 : 0
-  project = var.project_id
+  count   = var.create_shared_vpc && var.attach_shared_vpc ? 1 : 0
+  project = var.host_project_id
   role    = "roles/compute.securityAdmin"
   members = [
     "serviceAccount:service-${data.google_project.service_project[0].number}@container-engine-robot.iam.gserviceaccount.com",
@@ -153,7 +153,7 @@ resource "google_project_iam_binding" "gke_firewall_iam" {
 }
 
 resource "google_compute_subnetwork_iam_policy" "policy" {
-  count       = local.create_shared_vpc ? 1 : 0
+  count       = var.create_shared_vpc ? 1 : 0
   project     = google_compute_subnetwork.redpanda.project
   region      = google_compute_subnetwork.redpanda.region
   subnetwork  = google_compute_subnetwork.redpanda.name

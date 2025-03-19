@@ -1,4 +1,4 @@
-variable "project_id" {
+variable "host_project_id" {
   type        = string
   description = <<-HELP
   The project id
@@ -12,11 +12,19 @@ variable "region" {
   HELP
 }
 
-variable "service_project_id" {
+variable "shared_project_id" {
   type        = string
   description = <<-HELP
   The service project id
   HELP
+}
+
+variable "create_shared_vpc" {
+    type        = bool
+    default     = false
+    description = <<-HELP
+    When true will create the shared_vpc_host_project and shared_vpc_service_project
+    HELP
 }
 
 variable "psc_nat_subnet_ipv4_range" {
@@ -48,13 +56,6 @@ variable "network_vpc_name" {
   type        = string
   description = <<-HELP
   The name of the vpc
-  HELP
-}
-
-variable "network_project_id" {
-  type        = string
-  description = <<-HELP
-  The project id of the vpc
   HELP
 }
 

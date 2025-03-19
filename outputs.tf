@@ -3,7 +3,7 @@ output "network-vpc-name" {
 }
 
 output "network-project-id" {
-  value = var.project_id
+  value = var.host_project_id
 }
 
 output "network-subnet-name-external" {
