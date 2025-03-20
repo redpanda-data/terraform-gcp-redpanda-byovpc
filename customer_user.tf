@@ -56,7 +56,7 @@ resource "google_service_account" "customer_user_account" {
 
 resource "google_project_iam_member" "customer_user_role_binding" {
   count   = var.create_customer_user ? 1 : 0
-  project = var.host_project_id
+  project = var.project_id
   role    = google_project_iam_custom_role.customer_user_role.id
   member  = "serviceAccount:${google_service_account.customer_user_account[0].email}"
 }

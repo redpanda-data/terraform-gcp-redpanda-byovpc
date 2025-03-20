@@ -1,4 +1,4 @@
-variable "host_project_id" {
+variable "project_id" {
   type        = string
   description = <<-HELP
   The project id
@@ -12,50 +12,17 @@ variable "region" {
   HELP
 }
 
-variable "shared_project_id" {
-  type        = string
-  description = <<-HELP
-  The service project id
-  HELP
-}
-
-variable "create_shared_vpc" {
-    type        = bool
-    default     = false
-    description = <<-HELP
-    When true will create the shared_vpc_host_project and shared_vpc_service_project
-    HELP
-}
-
-variable "psc_nat_subnet_ipv4_range" {
-  type        = string
-  default     = "10.0.2.0/29"
-  description = <<-HELP
-  The IPv4 CIDR range of the PSC NAT subnet
-  HELP
-}
-
-variable "unique_identifier" {
-  type        = string
-  default     = ""
-  description = <<-HELP
-  If you intend to run multiple copies of this terraform you will need to provide a distinguishing string so that the
-  resources created will not have naming conflicts.
-  HELP
-}
-
-variable "attach_shared_vpc" {
-  type        = bool
-  default     = true
-  description = <<-HELP
-  When true will create the shared_vpc_host_project and shared_vpc_service_project attachments.
-  HELP
-}
-
 variable "network_vpc_name" {
   type        = string
   description = <<-HELP
   The name of the vpc
+  HELP
+}
+
+variable "network_project_id" {
+  type        = string
+  description = <<-HELP
+  The project id of the vpc
   HELP
 }
 
@@ -101,6 +68,15 @@ variable "force_destroy_cloud_storage_bucket" {
   HELP
 }
 
+variable "unique_identifier" {
+  type        = string
+  default     = ""
+  description = <<-HELP
+  If you intend to run multiple copies of this terraform you will need to provide a distinguishing string so that the
+  resources created will not have naming conflicts.
+  HELP
+}
+
 variable "create_customer_user" {
   type        = bool
   default     = false
@@ -141,4 +117,3 @@ variable "psc_config" {
   PSC configuration
   HELP
 }
-
