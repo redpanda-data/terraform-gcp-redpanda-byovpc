@@ -1,39 +1,54 @@
 provider "google" {
   project = var.project_id
-  region  = "us-central1"
+  region  = var.region
+  credentials = base64decode(var.gcp_creds)
 }
 
-variable "project_id" {
-  type        = string
-  default = "hallowed-ray-376320"
-  description = <<-HELP
-    The project id
-    HELP
+variable "gcp_creds" {
+    description = "Base64 encoded Google Cloud credentials"
+    type        = string
 }
 
-module "redpanda" {
+# Create a VPC network for our Redpanda cluster
+resource "google_compute_network" "redpanda_network" {
+  name                    = "redpanda-network"
+  auto_create_subnetworks = false
+}
+
+# Create a subnet for our Redpanda cluster
+resource "google_compute_subnetwork" "redpanda_subnet" {
+  name          = "redpanda-subnet"
+  ip_cidr_range = "10.0.0.0/24"
+  region        = var.region
+  network       = google_compute_network.redpanda_network.id
+}
+
+# Module for setting up Redpanda on GCP
+module "redpanda_gcp" {
   source = "../"
-  host_project_id = var.project_id
-
-  # Region where resources will be created
-  region = "us-central1"
-
-  # Network configuration
-  network_vpc_name = "redpanda-test-network"
-
-  # Optional: Add a unique identifier if running multiple instances
-  # unique_identifier = "prod"
-
-  # Private Link configuration
-  enable_private_link = false
-
-  # Whether to create customer user for rpk
+  project_id        = var.project_id
+  region            = var.region
+  network_project_id = var.project_id
+  network_vpc_name   = google_compute_network.redpanda_network.name
+  unique_identifier = var.environment
+  enable_private_link = true
+  force_destroy_mgmt_bucket = var.environment == "dev" ? true : false
+  max_redpanda_node_count = 10
   create_customer_user = true
+}
+variable "project_id" {
+  description = "The Google Cloud project ID"
+  type        = string
+}
 
-  # Bucket delete behavior
-  force_destroy_mgmt_bucket         = true
-  force_destroy_cloud_storage_bucket = true
+variable "region" {
+  description = "The Google Cloud region to deploy resources to"
+  type        = string
+  default     = "us-central1"
+}
 
-  # Shared VPC is not needed since everything is in one project
-  attach_shared_vpc = false
+variable "environment" {
+  description = "Environment name (dev, staging, prod)"
+  type        = string
+  default     = "dev"
 }
