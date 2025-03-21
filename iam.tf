@@ -1,5 +1,4 @@
 locals {
-  using_shared_vpc = (var.project_id != var.project_id)
   basic_agent_permissions = [
     "compute.firewalls.get",
     "compute.globalOperations.get",
@@ -81,7 +80,7 @@ locals {
     "compute.regionNetworkEndpointGroups.attachNetworkEndpoints",
     "compute.regionNetworkEndpointGroups.detachNetworkEndpoints",
   ]
-  agent_permissions = var.enable_private_link ? concat(local.basic_agent_permissions, local.psc_agent_permissions) : local.basic_agent_permissions
+  agent_permissions = local.basic_agent_permissions
 
   postfix = var.unique_identifier != "" ? "-${var.unique_identifier}" : ""
 }
@@ -121,15 +120,6 @@ resource "google_storage_bucket_iam_member" "redpanda_agent_storage_object_admin
   member = "serviceAccount:${google_service_account.redpanda_agent.email}"
 }
 
-resource "google_project_iam_member" "redpanda_agent_shared_vpc_permissions" {
-  count   = local.using_shared_vpc ? 1 : 0
-  project = var.project_id
-  role    = var.shared_vpc_custom_role
-  member  = "serviceAccount:${google_service_account.redpanda_agent.email}"
-  lifecycle {
-    create_before_destroy = true
-  }
-}
 
 resource "google_service_account" "redpanda_cluster" {
   account_id                   = "redpanda-cluster${local.postfix}"
@@ -337,11 +327,4 @@ resource "google_service_account_iam_member" "connectors_workload_identity" {
   service_account_id = "projects/${var.project_id}/serviceAccounts/${google_service_account.connectors.account_id}@${var.project_id}.iam.gserviceaccount.com"
   role               = "roles/iam.workloadIdentityUser"
   member             = "serviceAccount:${var.project_id}.svc.id.goog[redpanda-connectors/connectors-${google_service_account.connectors.account_id}]"
-}
-
-resource "google_service_account_iam_member" "psc_controller_workload_identity" {
-  count              = var.enable_private_link ? 1 : 0
-  service_account_id = "projects/${var.project_id}/serviceAccounts/${google_service_account.redpanda_gke.account_id}@${var.project_id}.iam.gserviceaccount.com"
-  role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.project_id}.svc.id.goog[redpanda-psc/psc-controller]"
 }

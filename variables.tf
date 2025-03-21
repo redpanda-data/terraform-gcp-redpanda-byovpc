@@ -12,27 +12,11 @@ variable "region" {
   HELP
 }
 
-variable "shared_vpc_custom_role" {
-  type        = string
-  default     = ""
-  description = <<-HELP
-  id of the role in the host project we want to grant to the redpada-agent
-  HELP
-}
-
 variable "rpk_user_custom_role" {
   type        = string
   default     = ""
   description = <<-HELP
   id of the role in the host project we want to grant to the rpk user
-  HELP
-}
-
-variable "enable_private_link" {
-  type        = bool
-  default     = false
-  description = <<-HELP
-  toggle the creation of Private Link/ PSC-related resources
   HELP
 }
 
