@@ -1,5 +1,5 @@
 locals {
-  using_shared_vpc = (var.project_id != var.network_project_id)
+  using_shared_vpc = (var.project_id != var.project_id)
   basic_agent_permissions = [
     "compute.firewalls.get",
     "compute.globalOperations.get",
@@ -123,7 +123,7 @@ resource "google_storage_bucket_iam_member" "redpanda_agent_storage_object_admin
 
 resource "google_project_iam_member" "redpanda_agent_shared_vpc_permissions" {
   count   = local.using_shared_vpc ? 1 : 0
-  project = var.network_project_id
+  project = var.project_id
   role    = var.shared_vpc_custom_role
   member  = "serviceAccount:${google_service_account.redpanda_agent.email}"
   lifecycle {

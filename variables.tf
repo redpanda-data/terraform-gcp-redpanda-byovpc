@@ -12,20 +12,6 @@ variable "region" {
   HELP
 }
 
-variable "network_vpc_name" {
-  type        = string
-  description = <<-HELP
-  The name of the vpc
-  HELP
-}
-
-variable "network_project_id" {
-  type        = string
-  description = <<-HELP
-  The project id of the vpc
-  HELP
-}
-
 variable "shared_vpc_custom_role" {
   type        = string
   default     = ""

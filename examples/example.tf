@@ -9,27 +9,11 @@ variable "gcp_creds" {
     type        = string
 }
 
-# Create a VPC network for our Redpanda cluster
-resource "google_compute_network" "redpanda_network" {
-  name                    = "redpanda-network"
-  auto_create_subnetworks = false
-}
-
-# Create a subnet for our Redpanda cluster
-resource "google_compute_subnetwork" "redpanda_subnet" {
-  name          = "redpanda-subnet"
-  ip_cidr_range = "10.0.0.0/24"
-  region        = var.region
-  network       = google_compute_network.redpanda_network.id
-}
-
 # Module for setting up Redpanda on GCP
 module "redpanda_gcp" {
   source = "../"
   project_id        = var.project_id
   region            = var.region
-  network_project_id = var.project_id
-  network_vpc_name   = google_compute_network.redpanda_network.name
   unique_identifier = var.environment
   enable_private_link = true
   force_destroy_mgmt_bucket = var.environment == "dev" ? true : false
