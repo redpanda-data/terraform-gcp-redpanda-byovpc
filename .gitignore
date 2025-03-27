@@ -37,4 +37,8 @@ terraform.rc
 .idea/terraform.xml
 .idea/vcs.xml
 examples/.terraform.lock.hcl
-.idea/workspace.xml
+
+# ignore IDE files
+.idea
+
+.terraform.lock.hcl

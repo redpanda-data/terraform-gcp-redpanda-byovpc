@@ -1,14 +1,29 @@
-variable "project_id" {
+variable "service_project_id" {
   type        = string
   description = <<-HELP
-  The project id
+  The project id where the redpanda cluster will be deployed. Required.
   HELP
 }
 
 variable "region" {
   type        = string
   description = <<-HELP
-  The region where the VPC lives. Required.
+  The region where the redpanda cluster will be deployed. Required.
+  HELP
+}
+
+variable "network_project_id" {
+  type        = string
+  description = <<-HELP
+  The project id of the vpc
+  HELP
+}
+
+variable "enable_private_link" {
+  type        = bool
+  default     = false
+  description = <<-HELP
+  toggle the creation of Private Link/ PSC-related resources
   HELP
 }
 
@@ -39,12 +54,12 @@ variable "unique_identifier" {
   HELP
 }
 
-variable "create_customer_user" {
+variable "create_test_user" {
   type        = bool
   default     = false
   description = <<-HELP
-  Whether or not to create the customer user service account. The customer user service account is used to simulate a
-  user with limited permissions when running rpk.
+  When true a test user will be created with the minimum necessary permissions for running 'rpk byoc apply'
+  Not commonly used in a production setting. Test user is provided only for documentation and testing purposes.
   HELP
 }
 
@@ -81,5 +96,25 @@ variable "psc_config" {
 }
 
 variable "gke_master_ipv4_cidr_block" {
-  default = "10.3.0.0/28"
+  default     = "10.0.7.240/28"
+  description = <<-HELP
+  A /28 CIDR is required for the GKE master IP addresses. This CIDR is not used in the GCP networking configuration,
+  but is input into the Redpanda UI; for example, 10.0.7.240/28.
+  HELP
+}
+
+variable "attach_shared_vpc" {
+  type        = bool
+  default     = true
+  description = <<-HELP
+  When true will create the shared_vpc_host_project and shared_vpc_service_project attachments.
+  HELP
+}
+
+variable "psc_nat_subnet_ipv4_range" {
+  type        = string
+  default     = "10.0.2.0/29"
+  description = <<-HELP
+  The IPv4 CIDR range of the PSC NAT subnet
+  HELP
 }
