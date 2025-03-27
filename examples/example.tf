@@ -12,8 +12,8 @@ variable "gcp_creds" {
 # Module for setting up Redpanda on GCP
 module "redpanda_gcp" {
   source                    = "../"
-  service_project_id                = var.project_id
-  network_project_id = var.project_id
+  service_project_id        = var.project_id
+  network_project_id        = var.project_id
   region                    = var.region
   unique_identifier         = var.environment
   enable_private_link       = true

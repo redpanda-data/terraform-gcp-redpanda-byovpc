@@ -118,3 +118,8 @@ variable "psc_nat_subnet_ipv4_range" {
   The IPv4 CIDR range of the PSC NAT subnet
   HELP
 }
+
+variable "k8s_master_ipv4_range" {
+  type    = string
+  default = "10.0.7.240/28"
+}

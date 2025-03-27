@@ -2,64 +2,68 @@ output "management_bucket_name" {
   value = google_storage_bucket.management_bucket.name
 }
 
-output "redpanda_cloud_storage_bucket_name" {
-  value = google_storage_bucket.redpanda_cloud_storage.name
+output "network_name" {
+  value = google_compute_network.redpanda.name
 }
 
-output "agent_service_account_id" {
-  value = google_service_account.redpanda_agent.account_id
+output "network_project_id" {
+  value = var.network_project_id
 }
 
 output "agent_service_account_email" {
   value = google_service_account.redpanda_agent.email
 }
 
-output "redpanda_cluster_service_account_id" {
-  value = google_service_account.redpanda_cluster.account_id
-}
-
-output "redpanda_cluster_service_account_email" {
-  value = google_service_account.redpanda_cluster.email
-}
-
-output "gke_service_account_id" {
-  value = google_service_account.redpanda_gke.account_id
-}
-
-output "gke_service_account_email" {
-  value = google_service_account.redpanda_gke.email
-}
-
-output "console_service_account_id" {
-  value = google_service_account.console.account_id
+output "connector_service_account_email" {
+  value = google_service_account.connectors.email
 }
 
 output "console_service_account_email" {
   value = google_service_account.console.email
 }
 
-output "connectors_service_account_id" {
-  value = google_service_account.connectors.account_id
+output "gke_service_account_email" {
+  value = google_service_account.redpanda_gke.email
 }
 
-output "connectors_service_account_email" {
-  value = google_service_account.connectors.email
+output "psc_nat_subnet_name" {
+  value = var.enable_private_link ? google_compute_subnetwork.psc_nat[0].name : ""
 }
 
-output "redpanda_connect_service_account_id" {
-  value = google_service_account.redpanda_connect.account_id
+output "redpanda_cluster_service_account_email" {
+  value = google_service_account.redpanda_cluster.email
+}
+
+output "redpanda_connect_api_service_account_email" {
+  value = google_service_account.redpanda_connect_api.email
 }
 
 output "redpanda_connect_service_account_email" {
   value = google_service_account.redpanda_connect.email
 }
 
-output "redpanda_connect_api_service_account_id" {
-  value = google_service_account.redpanda_connect_api.account_id
+output "redpanda_operator_service_account_email" {
+  value = google_service_account.redpanda_operator.email
 }
 
-output "redpanda_connect_api_service_account_email" {
-  value = google_service_account.redpanda_connect_api.email
+output "k8s_master_ipv4_range" {
+  value = var.k8s_master_ipv4_range
+}
+
+output "subnet_name" {
+  value = google_compute_subnetwork.redpanda.name
+}
+
+output "secondary_ipv4_range_pods_name" {
+  value = google_compute_subnetwork.redpanda.secondary_ip_range.0.range_name
+}
+
+output "secondary_ipv4_range_services_name" {
+  value = google_compute_subnetwork.redpanda.secondary_ip_range.1.range_name
+}
+
+output "tiered_storage_bucket_name" {
+  value = google_storage_bucket.redpanda_cloud_storage.name
 }
 
 output "test_user_account" {

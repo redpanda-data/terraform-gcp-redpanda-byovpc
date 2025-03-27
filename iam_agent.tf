@@ -182,5 +182,5 @@ resource "google_project_iam_custom_role" "shared_vpc_redpanda_agent" {
   title       = "Redpanda Agent Role"
   description = "A role granting the redpanda agent permissions to view network resources in the project of the vpc."
   permissions = local.network_project_agent_permissions
-  project = var.network_project_id
+  project     = var.network_project_id
 }
