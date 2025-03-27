@@ -53,3 +53,17 @@ resource "google_project_service" "service_usage" {
   disable_on_destroy         = false
   project                    = var.service_project_id
 }
+
+resource "google_project_service" "network_project_compute_api" {
+  service                    = "compute.googleapis.com"
+  disable_dependent_services = false
+  disable_on_destroy         = false
+  project                    = var.network_project_id
+}
+
+resource "google_project_service" "network_project_container_api" {
+  service                    = "container.googleapis.com"
+  disable_dependent_services = false
+  disable_on_destroy         = false
+  project                    = var.network_project_id
+}

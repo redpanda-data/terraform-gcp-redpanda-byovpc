@@ -12,34 +12,10 @@ variable "region" {
   HELP
 }
 
-variable "network_vpc_name" {
-  type        = string
-  description = <<-HELP
-  The name of the vpc
-  HELP
-}
-
 variable "network_project_id" {
   type        = string
   description = <<-HELP
   The project id of the vpc
-  HELP
-}
-
-variable "shared_vpc_custom_role" {
-  type        = string
-  default     = ""
-  description = <<-HELP
-  id of the role in the host project we want to grant to the redpada-agent
-  HELP
-}
-
-variable "network_project_test_user_role" {
-  type        = string
-  default     = ""
-  description = <<-HELP
-  If using the shared VPC model this role grants the required permissions to the test user in the network project.
-  Not commonly used in a production setting. Test user is provided only for documentation and testing purposes.
   HELP
 }
 
@@ -124,5 +100,21 @@ variable "gke_master_ipv4_cidr_block" {
   description = <<-HELP
   A /28 CIDR is required for the GKE master IP addresses. This CIDR is not used in the GCP networking configuration,
   but is input into the Redpanda UI; for example, 10.0.7.240/28.
+  HELP
+}
+
+variable "attach_shared_vpc" {
+  type        = bool
+  default     = true
+  description = <<-HELP
+  When true will create the shared_vpc_host_project and shared_vpc_service_project attachments.
+  HELP
+}
+
+variable "psc_nat_subnet_ipv4_range" {
+  type        = string
+  default     = "10.0.2.0/29"
+  description = <<-HELP
+  The IPv4 CIDR range of the PSC NAT subnet
   HELP
 }

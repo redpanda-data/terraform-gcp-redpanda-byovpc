@@ -12,13 +12,14 @@ variable "gcp_creds" {
 # Module for setting up Redpanda on GCP
 module "redpanda_gcp" {
   source                    = "../"
-  project_id                = var.project_id
+  service_project_id                = var.project_id
+  network_project_id = var.project_id
   region                    = var.region
   unique_identifier         = var.environment
   enable_private_link       = true
   force_destroy_mgmt_bucket = var.environment == "dev" ? true : false
   max_redpanda_node_count   = 10
-  create_test_user          = true
+  create_test_user          = false
 }
 variable "project_id" {
   description = "The Google Cloud project ID"

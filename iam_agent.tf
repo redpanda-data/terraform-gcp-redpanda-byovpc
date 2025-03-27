@@ -1,5 +1,5 @@
 locals {
-  basic_agent_permissions = [
+  service_project_core_agent_permissions = [
     "compute.firewalls.get",
     "compute.globalOperations.get",
     "compute.disks.get",       # required for applying custom labels via go code
@@ -48,7 +48,8 @@ locals {
     "storage.buckets.get",
     "storage.buckets.getIamPolicy",
   ]
-  psc_agent_permissions = [
+
+  service_project_psc_agent_permissions = [
     "compute.subnetworks.use",
     "compute.instances.use",
     "compute.networks.use",
@@ -80,7 +81,52 @@ locals {
     "compute.regionNetworkEndpointGroups.attachNetworkEndpoints",
     "compute.regionNetworkEndpointGroups.detachNetworkEndpoints",
   ]
-  agent_permissions = var.enable_private_link ? concat(local.basic_agent_permissions, local.psc_agent_permissions) : local.basic_agent_permissions
+
+  service_project_agent_permissions = var.enable_private_link ? concat(local.service_project_core_agent_permissions, local.service_project_psc_agent_permissions) : local.service_project_core_agent_permissions
+
+  network_project_core_agent_permissions = [
+    "compute.firewalls.get",
+    "compute.subnetworks.get",
+    "resourcemanager.projects.get",
+    "compute.networks.getRegionEffectiveFirewalls",
+    "compute.networks.getEffectiveFirewalls",
+    "compute.subnetworks.getIamPolicy", # required for validation/drift-detection
+  ]
+
+  network_project_psc_agent_permissions = [
+    "compute.subnetworks.use",
+    "compute.instances.use",
+    "compute.networks.use",
+    "compute.regionOperations.get",
+    "compute.serviceAttachments.create",
+    "compute.serviceAttachments.delete",
+    "compute.serviceAttachments.get",
+    "compute.serviceAttachments.list",
+    "compute.serviceAttachments.update",
+    "compute.forwardingRules.use",
+    "compute.forwardingRules.create",
+    "compute.forwardingRules.delete",
+    "compute.forwardingRules.get",
+    "compute.forwardingRules.setLabels",
+    "compute.forwardingRules.setTarget",
+    "compute.forwardingRules.pscCreate",
+    "compute.forwardingRules.pscDelete",
+    "compute.forwardingRules.pscSetLabels",
+    "compute.forwardingRules.pscSetTarget",
+    "compute.forwardingRules.pscUpdate",
+    "compute.regionBackendServices.create",
+    "compute.regionBackendServices.delete",
+    "compute.regionBackendServices.get",
+    "compute.regionBackendServices.use",
+    "compute.regionNetworkEndpointGroups.create",
+    "compute.regionNetworkEndpointGroups.delete",
+    "compute.regionNetworkEndpointGroups.get",
+    "compute.regionNetworkEndpointGroups.use",
+    "compute.regionNetworkEndpointGroups.attachNetworkEndpoints",
+    "compute.regionNetworkEndpointGroups.detachNetworkEndpoints",
+  ]
+
+  network_project_agent_permissions = var.enable_private_link ? concat(local.network_project_core_agent_permissions, local.network_project_psc_agent_permissions) : local.network_project_core_agent_permissions
 }
 
 resource "google_service_account" "redpanda_agent" {
@@ -96,7 +142,7 @@ resource "google_project_iam_custom_role" "redpanda_agent" {
   role_id     = replace("redpanda_agent_role${local.postfix}", "-", "_")
   title       = "Redpanda Agent Role"
   description = "A role comprising general permissions allowing the agent to manage Redpanda cluster resources."
-  permissions = local.agent_permissions
+  permissions = local.service_project_agent_permissions
 }
 
 resource "google_project_iam_member" "redpanda_agent_custom_role" {
@@ -123,9 +169,18 @@ resource "google_storage_bucket_iam_member" "redpanda_agent_storage_object_admin
 resource "google_project_iam_member" "redpanda_agent_shared_vpc_permissions" {
   count   = local.using_shared_vpc ? 1 : 0
   project = var.network_project_id
-  role    = var.shared_vpc_custom_role
+  role    = google_project_iam_custom_role.shared_vpc_redpanda_agent[0].id
   member  = "serviceAccount:${google_service_account.redpanda_agent.email}"
   lifecycle {
     create_before_destroy = true
   }
+}
+
+resource "google_project_iam_custom_role" "shared_vpc_redpanda_agent" {
+  count       = local.using_shared_vpc ? 1 : 0
+  role_id     = replace("redpanda_agent_role_network${local.postfix}", "-", "_")
+  title       = "Redpanda Agent Role"
+  description = "A role granting the redpanda agent permissions to view network resources in the project of the vpc."
+  permissions = local.network_project_agent_permissions
+  project = var.network_project_id
 }

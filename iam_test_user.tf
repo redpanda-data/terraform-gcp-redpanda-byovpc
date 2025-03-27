@@ -3,10 +3,8 @@ resource "google_project_iam_custom_role" "test_user_role" {
   title       = "BYOVPC Test User Role"
   project     = var.service_project_id
   description = <<EOT
-  An example role, provided only for documentation and testing purposes. Represents the minimum required permissions
-  for running 'rpk byoc apply' when creating a BYOVPC cluster. Likely your organization already has user roles that
-  you will choose to use, as long as those users have at least these permissions you will be able to successfully
-  run 'rpk byoc apply'.
+  Provided only for documentation and testing purposes. Minimum required permissions when creating a BYOVPC cluster.
+  As long as your user has at least these permissions you will be able to successfully run 'rpk byoc apply'.
   EOT
   permissions = [
     // required for pre-requisite validation
@@ -64,10 +62,31 @@ resource "google_project_iam_member" "test_user_role_binding" {
   member  = "serviceAccount:${google_service_account.test_user_account[0].email}"
 }
 
+resource "google_project_iam_custom_role" "network_project_test_user_role" {
+  count       = local.using_shared_vpc ? 1 : 0
+  role_id     = replace("byovpc_test_user_role${local.postfix}", "-", "_")
+  title       = "BYOVPC Test User Role"
+  description = <<EOT
+  Provided only for documentation and testing purposes. Minimum required permissions when creating a BYOVPC cluster
+  using shared VPC. As long as your user has at least these permissions you will be able to successfully run 'rpk byoc apply'.
+  EOT
+  permissions = [
+    "resourcemanager.projects.get",
+    "compute.subnetworks.get",
+    "compute.subnetworks.getIamPolicy",
+    "compute.networks.getRegionEffectiveFirewalls",
+    "resourcemanager.projects.getIamPolicy",
+    "iam.roles.get",
+    "compute.subnetworks.list",
+    "compute.subnetworks.use",
+  ]
+  project = var.network_project_id
+}
+
 resource "google_project_iam_member" "test_user_shared_vpc_permissions" {
   count   = local.using_shared_vpc && var.create_test_user ? 1 : 0
   project = var.network_project_id
-  role    = var.network_project_test_user_role
+  role    = google_project_iam_custom_role.network_project_test_user_role[0].id
   member  = "serviceAccount:${google_service_account.test_user_account[0].email}"
   lifecycle {
     create_before_destroy = true
