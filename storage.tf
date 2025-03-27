@@ -7,6 +7,7 @@ resource "google_storage_bucket" "management_bucket" {
   versioning {
     enabled = true
   }
+  project = var.service_project_id
 }
 
 resource "google_storage_bucket" "redpanda_cloud_storage" {
@@ -18,4 +19,5 @@ resource "google_storage_bucket" "redpanda_cloud_storage" {
   versioning {
     enabled = false
   }
+  project = var.service_project_id
 }

@@ -1,6 +1,7 @@
 resource "google_project_iam_custom_role" "customer_user_role" {
   role_id     = replace("byovpc_customer_user_role${local.postfix}", "-", "_")
   title       = "BYOVPC Customer User Role"
+  project     = var.service_project_id
   description = <<EOT
   The role that a customer might use when running rpk.
   It has limited access to create things (in particular you cannot create service accounts, storage buckets, enable
@@ -52,11 +53,12 @@ resource "google_service_account" "customer_user_account" {
   count        = var.create_customer_user ? 1 : 0
   account_id   = "byovpc-customer${local.postfix}"
   display_name = "The account that should be used when creating the agent using rpk"
+  project      = var.service_project_id
 }
 
 resource "google_project_iam_member" "customer_user_role_binding" {
   count   = var.create_customer_user ? 1 : 0
-  project = var.project_id
+  project = var.service_project_id
   role    = google_project_iam_custom_role.customer_user_role.id
   member  = "serviceAccount:${google_service_account.customer_user_account[0].email}"
 }

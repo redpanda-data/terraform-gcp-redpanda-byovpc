@@ -6,6 +6,7 @@ resource "google_compute_network" "redpanda" {
   depends_on = [
     google_project_service.compute_api
   ]
+  project = var.service_project_id
 }
 
 resource "google_compute_subnetwork" "redpanda" {
@@ -26,6 +27,7 @@ resource "google_compute_subnetwork" "redpanda" {
   depends_on = [
     google_compute_network.redpanda
   ]
+  project = var.service_project_id
 }
 
 resource "google_compute_router" "nat" {
@@ -36,6 +38,7 @@ resource "google_compute_router" "nat" {
     google_compute_network.redpanda,
     google_project_service.compute_api
   ]
+  project = var.service_project_id
 }
 
 resource "google_compute_address" "nat" {
@@ -45,6 +48,7 @@ resource "google_compute_address" "nat" {
   depends_on = [
     google_project_service.compute_api
   ]
+  project = var.service_project_id
 }
 
 resource "google_compute_router_nat" "redpanda" {
@@ -59,4 +63,5 @@ resource "google_compute_router_nat" "redpanda" {
     google_compute_address.nat,
     google_project_service.compute_api
   ]
+  project = var.service_project_id
 }

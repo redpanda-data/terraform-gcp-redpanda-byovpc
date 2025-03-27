@@ -1,5 +1,5 @@
 locals {
-  using_shared_vpc = (var.project_id != var.network_project_id)
+  using_shared_vpc = (var.service_project_id != var.network_project_id)
   basic_agent_permissions = [
     "compute.firewalls.get",
     "compute.globalOperations.get",
@@ -87,6 +87,7 @@ locals {
 }
 
 resource "google_service_account" "redpanda_agent" {
+  project                      = var.service_project_id
   account_id                   = "redpanda-agent${local.postfix}"
   display_name                 = "Redpanda Agent Service Account"
   description                  = "Redpanda Agent Service Account"
@@ -94,6 +95,7 @@ resource "google_service_account" "redpanda_agent" {
 }
 
 resource "google_project_iam_custom_role" "redpanda_agent" {
+  project     = var.service_project_id
   role_id     = replace("redpanda_agent_role${local.postfix}", "-", "_")
   title       = "Redpanda Agent Role"
   description = "A role comprising general permissions allowing the agent to manage Redpanda cluster resources."
@@ -101,7 +103,7 @@ resource "google_project_iam_custom_role" "redpanda_agent" {
 }
 
 resource "google_project_iam_member" "redpanda_agent_custom_role" {
-  project = var.project_id
+  project = var.service_project_id
   role    = google_project_iam_custom_role.redpanda_agent.id
   member  = "serviceAccount:${google_service_account.redpanda_agent.email}"
   lifecycle {
@@ -110,15 +112,15 @@ resource "google_project_iam_member" "redpanda_agent_custom_role" {
 }
 
 resource "google_project_iam_member" "redpanda_agent_container_admin" {
-  project = var.project_id
+  project = var.service_project_id
   role    = "roles/container.admin"
   member  = "serviceAccount:${google_service_account.redpanda_agent.email}"
 }
 
 resource "google_storage_bucket_iam_member" "redpanda_agent_storage_object_admin" {
-  bucket = google_storage_bucket.management_bucket.name
-  role   = "roles/storage.objectAdmin"
-  member = "serviceAccount:${google_service_account.redpanda_agent.email}"
+  bucket  = google_storage_bucket.management_bucket.name
+  role    = "roles/storage.objectAdmin"
+  member  = "serviceAccount:${google_service_account.redpanda_agent.email}"
 }
 
 resource "google_project_iam_member" "redpanda_agent_shared_vpc_permissions" {
@@ -132,24 +134,27 @@ resource "google_project_iam_member" "redpanda_agent_shared_vpc_permissions" {
 }
 
 resource "google_service_account" "redpanda_cluster" {
+  project                      = var.service_project_id
   account_id                   = "redpanda-cluster${local.postfix}"
   display_name                 = "Redpanda Cluster Service Account"
   create_ignore_already_exists = true
 }
 
 resource "google_storage_bucket_iam_member" "redpanda_cluster_cloud_storage_admin" {
-  bucket = google_storage_bucket.redpanda_cloud_storage.name
-  role   = "roles/storage.objectAdmin"
-  member = "serviceAccount:${google_service_account.redpanda_cluster.email}"
+  bucket  = google_storage_bucket.redpanda_cloud_storage.name
+  role    = "roles/storage.objectAdmin"
+  member  = "serviceAccount:${google_service_account.redpanda_cluster.email}"
 }
 
 resource "google_service_account" "redpanda_gke" {
+  project                      = var.service_project_id
   account_id                   = "redpanda-gke${local.postfix}"
   display_name                 = "Redpanda GKE cluster default node service account"
   create_ignore_already_exists = true
 }
 
 resource "google_project_iam_custom_role" "redpanda_utility_node" {
+  project = var.service_project_id
   role_id = replace("redpanda_gke_utility_role${local.postfix}", "-", "_")
   title   = "Redpanda cluster utility node role"
   permissions = [
@@ -246,7 +251,7 @@ resource "google_project_iam_custom_role" "redpanda_utility_node" {
 }
 
 resource "google_project_iam_member" "redpanda_utility" {
-  project = var.project_id
+  project = var.service_project_id
   role    = google_project_iam_custom_role.redpanda_utility_node.id
   member  = "serviceAccount:${google_service_account.redpanda_gke.email}"
 }
@@ -254,13 +259,13 @@ resource "google_project_iam_member" "redpanda_utility" {
 resource "google_service_account" "console" {
   account_id                   = "redpanda-console${local.postfix}"
   display_name                 = "Redpanda Console Service Account"
-  project                      = var.project_id
+  project                      = var.service_project_id
   create_ignore_already_exists = true
 }
 
 resource "google_project_iam_custom_role" "console_secret_manager" {
   role_id = replace("redpanda_console_secret_manager_role${local.postfix}", "-", "_")
-  project = var.project_id
+  project = var.service_project_id
   title   = "Redpanda Console Secret Manager Writer"
   permissions = [
     "secretmanager.secrets.get",
@@ -278,7 +283,7 @@ resource "google_project_iam_custom_role" "console_secret_manager" {
 }
 
 resource "google_project_iam_member" "console_secret_manager" {
-  project = var.project_id
+  project = var.service_project_id
   role    = google_project_iam_custom_role.console_secret_manager.id
   member  = "serviceAccount:${google_service_account.console.email}"
 }
@@ -286,13 +291,13 @@ resource "google_project_iam_member" "console_secret_manager" {
 resource "google_service_account" "redpanda_connect_api" {
   account_id                   = "redpanda-connect-api${local.postfix}"
   display_name                 = "Redpanda Connect API Service Account"
-  project                      = var.project_id
+  project                      = var.service_project_id
   create_ignore_already_exists = true
 }
 
 resource "google_project_iam_custom_role" "redpanda_connect_api_custom_role" {
   role_id = replace("redpanda_redpanda_connect_api_role${local.postfix}", "-", "_")
-  project = var.project_id
+  project = var.service_project_id
   title   = "Redpanda Connect API Role"
   permissions = [
     "secretmanager.secrets.get"
@@ -300,7 +305,7 @@ resource "google_project_iam_custom_role" "redpanda_connect_api_custom_role" {
 }
 
 resource "google_project_iam_member" "redpanda_connect_api" {
-  project = var.project_id
+  project = var.service_project_id
   role    = google_project_iam_custom_role.redpanda_connect_api_custom_role.id
   member  = "serviceAccount:${google_service_account.redpanda_connect_api.email}"
 }
@@ -308,13 +313,13 @@ resource "google_project_iam_member" "redpanda_connect_api" {
 resource "google_service_account" "connectors" {
   account_id                   = "redpanda-connectors${local.postfix}"
   display_name                 = "Redpanda Connectors Service Account"
-  project                      = var.project_id
+  project                      = var.service_project_id
   create_ignore_already_exists = true
 }
 
 resource "google_project_iam_custom_role" "connectors_custom_role" {
   role_id = replace("redpanda_connectors_role${local.postfix}", "-", "_")
-  project = var.project_id
+  project = var.service_project_id
   title   = "Redpanda Connectors Custom Role"
   permissions = [
     "resourcemanager.projects.get",
@@ -323,7 +328,7 @@ resource "google_project_iam_custom_role" "connectors_custom_role" {
 }
 
 resource "google_project_iam_member" "connectors_secret_manager" {
-  project = var.project_id
+  project = var.service_project_id
   role    = google_project_iam_custom_role.connectors_custom_role.id
   member  = "serviceAccount:${google_service_account.connectors.email}"
   lifecycle {
@@ -334,13 +339,13 @@ resource "google_project_iam_member" "connectors_secret_manager" {
 resource "google_service_account" "redpanda_connect" {
   account_id                   = "redpanda-connect${local.postfix}"
   display_name                 = "Redpanda Connect Service Account"
-  project                      = var.project_id
+  project                      = var.service_project_id
   create_ignore_already_exists = true
 }
 
 resource "google_project_iam_custom_role" "redpanda_connect_custom_role" {
   role_id = replace("redpanda_connect_role${local.postfix}", "-", "_")
-  project = var.project_id
+  project = var.service_project_id
   title   = "Redpanda Connect Role"
   permissions = [
     "resourcemanager.projects.get",
@@ -349,7 +354,7 @@ resource "google_project_iam_custom_role" "redpanda_connect_custom_role" {
 }
 
 resource "google_project_iam_member" "redpanda_connect" {
-  project = var.project_id
+  project = var.service_project_id
   role    = google_project_iam_custom_role.redpanda_connect_custom_role.id
   member  = "serviceAccount:${google_service_account.redpanda_connect.email}"
   lifecycle {
@@ -358,50 +363,50 @@ resource "google_project_iam_member" "redpanda_connect" {
 }
 
 resource "google_service_account_iam_member" "gke_cert_workload_identity" {
-  service_account_id = "projects/${var.project_id}/serviceAccounts/${google_service_account.redpanda_gke.account_id}@${var.project_id}.iam.gserviceaccount.com"
+  service_account_id = "projects/${var.service_project_id}/serviceAccounts/${google_service_account.redpanda_gke.account_id}@${var.service_project_id}.iam.gserviceaccount.com"
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.project_id}.svc.id.goog[cert-manager/cert-manager]"
+  member             = "serviceAccount:${var.service_project_id}.svc.id.goog[cert-manager/cert-manager]"
 }
 
 resource "google_service_account_iam_member" "gke_dns_workload_identity" {
-  service_account_id = "projects/${var.project_id}/serviceAccounts/${google_service_account.redpanda_gke.account_id}@${var.project_id}.iam.gserviceaccount.com"
+  service_account_id = "projects/${var.service_project_id}/serviceAccounts/${google_service_account.redpanda_gke.account_id}@${var.service_project_id}.iam.gserviceaccount.com"
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.project_id}.svc.id.goog[external-dns/external-dns]"
+  member             = "serviceAccount:${var.service_project_id}.svc.id.goog[external-dns/external-dns]"
 }
 
 resource "google_service_account_iam_member" "redpanda_cluster_service_account_binding" {
-  service_account_id = "projects/${var.project_id}/serviceAccounts/${google_service_account.redpanda_cluster.account_id}@${var.project_id}.iam.gserviceaccount.com"
+  service_account_id = "projects/${var.service_project_id}/serviceAccounts/${google_service_account.redpanda_cluster.account_id}@${var.service_project_id}.iam.gserviceaccount.com"
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.project_id}.svc.id.goog[redpanda/rp-${google_service_account.redpanda_cluster.account_id}]"
+  member             = "serviceAccount:${var.service_project_id}.svc.id.goog[redpanda/rp-${google_service_account.redpanda_cluster.account_id}]"
 }
 
 resource "google_service_account_iam_member" "console_service_account_binding" {
-  service_account_id = "projects/${var.project_id}/serviceAccounts/${google_service_account.console.account_id}@${var.project_id}.iam.gserviceaccount.com"
+  service_account_id = "projects/${var.service_project_id}/serviceAccounts/${google_service_account.console.account_id}@${var.service_project_id}.iam.gserviceaccount.com"
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.project_id}.svc.id.goog[redpanda/console-${google_service_account.console.account_id}]"
+  member             = "serviceAccount:${var.service_project_id}.svc.id.goog[redpanda/console-${google_service_account.console.account_id}]"
 }
 
 resource "google_service_account_iam_member" "redpanda_connect_api_workload_identity" {
-  service_account_id = "projects/${var.project_id}/serviceAccounts/${google_service_account.redpanda_connect_api.account_id}@${var.project_id}.iam.gserviceaccount.com"
+  service_account_id = "projects/${var.service_project_id}/serviceAccounts/${google_service_account.redpanda_connect_api.account_id}@${var.service_project_id}.iam.gserviceaccount.com"
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.project_id}.svc.id.goog[redpanda-connect/${google_service_account.redpanda_connect_api.account_id}]"
+  member             = "serviceAccount:${var.service_project_id}.svc.id.goog[redpanda-connect/${google_service_account.redpanda_connect_api.account_id}]"
 }
 
 resource "google_service_account_iam_member" "connectors_workload_identity" {
-  service_account_id = "projects/${var.project_id}/serviceAccounts/${google_service_account.connectors.account_id}@${var.project_id}.iam.gserviceaccount.com"
+  service_account_id = "projects/${var.service_project_id}/serviceAccounts/${google_service_account.connectors.account_id}@${var.service_project_id}.iam.gserviceaccount.com"
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.project_id}.svc.id.goog[redpanda-connectors/connectors-${google_service_account.connectors.account_id}]"
+  member             = "serviceAccount:${var.service_project_id}.svc.id.goog[redpanda-connectors/connectors-${google_service_account.connectors.account_id}]"
 }
 
 resource "google_service_account_iam_member" "redpanda_connect_workload_identity" {
-  service_account_id = "projects/${var.project_id}/serviceAccounts/${google_service_account.redpanda_connect.account_id}@${var.project_id}.iam.gserviceaccount.com"
+  service_account_id = "projects/${var.service_project_id}/serviceAccounts/${google_service_account.redpanda_connect.account_id}@${var.service_project_id}.iam.gserviceaccount.com"
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.project_id}.svc.id.goog[redpanda-connect/${google_service_account.redpanda_connect.account_id}]"
+  member             = "serviceAccount:${var.service_project_id}.svc.id.goog[redpanda-connect/${google_service_account.redpanda_connect.account_id}]"
 }
 
 resource "google_service_account_iam_member" "psc_controller_workload_identity" {
   count              = var.enable_private_link ? 1 : 0
-  service_account_id = "projects/${var.project_id}/serviceAccounts/${google_service_account.redpanda_gke.account_id}@${var.project_id}.iam.gserviceaccount.com"
+  service_account_id = "projects/${var.service_project_id}/serviceAccounts/${google_service_account.redpanda_gke.account_id}@${var.service_project_id}.iam.gserviceaccount.com"
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.project_id}.svc.id.goog[redpanda-psc/psc-controller]"
+  member             = "serviceAccount:${var.service_project_id}.svc.id.goog[redpanda-psc/psc-controller]"
 }

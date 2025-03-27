@@ -1,14 +1,14 @@
-variable "project_id" {
+variable "service_project_id" {
   type        = string
   description = <<-HELP
-  The project id
+  The project id where the redpanda cluster will be deployed. Required.
   HELP
 }
 
 variable "region" {
   type        = string
   description = <<-HELP
-  The region where the VPC lives. Required.
+  The region where the redpanda cluster will be deployed. Required.
   HELP
 }
 
@@ -115,5 +115,13 @@ variable "psc_config" {
   }
   description = <<-HELP
   PSC configuration
+  HELP
+}
+
+variable "gke_master_ipv4_cidr_block" {
+  default     = "10.3.0.0/28"
+  description = <<-HELP
+  A /28 CIDR is required for the GKE master IP addresses. This CIDR is not used in the GCP networking configuration,
+  but is input into the Redpanda UI; for example, 10.0.7.240/28.
   HELP
 }
