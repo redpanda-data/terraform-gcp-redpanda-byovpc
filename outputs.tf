@@ -47,7 +47,7 @@ output "redpanda_operator_service_account_email" {
 }
 
 output "k8s_master_ipv4_range" {
-  value = var.k8s_master_ipv4_range
+  value = var.gke_master_ipv4_cidr_block
 }
 
 output "subnet_name" {
