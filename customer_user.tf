@@ -60,3 +60,13 @@ resource "google_project_iam_member" "customer_user_role_binding" {
   role    = google_project_iam_custom_role.customer_user_role.id
   member  = "serviceAccount:${google_service_account.customer_user_account[0].email}"
 }
+
+resource "google_project_iam_member" "rpk_user_shared_vpc_permissions" {
+  count   = local.using_shared_vpc && var.create_customer_user ? 1 : 0
+  project = var.network_project_id
+  role    = var.rpk_user_custom_role
+  member  = "serviceAccount:${google_service_account.customer_user_account[0].email}"
+  lifecycle {
+    create_before_destroy = true
+  }
+}

@@ -46,26 +46,22 @@ output "connectors_service_account_email" {
   value = google_service_account.connectors.email
 }
 
+output "redpanda_connect_service_account_account_id" {
+  value = google_service_account.redpanda_connect.account_id
+}
+
+output "redpanda_connect_service_account_email" {
+  value = google_service_account.redpanda_connect.email
+}
+
+output "redpanda_connect_api_service_account_account_id" {
+  value = google_service_account.redpanda_connect_api.account_id
+}
+
+output "redpanda_connect_api_service_account_email" {
+  value = google_service_account.redpanda_connect_api.email
+}
+
 output "customer_user_account" {
   value = var.create_customer_user ? google_service_account.customer_user_account[0].account_id : ""
-}
-
-output "network-vpc-name" {
-  value = google_compute_network.redpanda.name
-}
-
-output "network-project-id" {
-  value = var.project_id
-}
-
-output "network-subnet-name-external" {
-  value = google_compute_subnetwork.redpanda.name
-}
-
-output "secondary_ipv4_range_pods" {
-  value = google_compute_subnetwork.redpanda.secondary_ip_range[0].range_name
-}
-
-output "secondary_ipv4_range_services" {
-  value = google_compute_subnetwork.redpanda.secondary_ip_range[1].range_name
 }

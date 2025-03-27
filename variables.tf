@@ -12,6 +12,44 @@ variable "region" {
   HELP
 }
 
+variable "network_vpc_name" {
+  type        = string
+  description = <<-HELP
+  The name of the vpc
+  HELP
+}
+
+variable "network_project_id" {
+  type        = string
+  description = <<-HELP
+  The project id of the vpc
+  HELP
+}
+
+variable "shared_vpc_custom_role" {
+  type        = string
+  default     = ""
+  description = <<-HELP
+  id of the role in the host project we want to grant to the redpada-agent
+  HELP
+}
+
+variable "rpk_user_custom_role" {
+  type        = string
+  default     = ""
+  description = <<-HELP
+  id of the role in the host project we want to grant to the rpk user
+  HELP
+}
+
+variable "enable_private_link" {
+  type        = bool
+  default     = false
+  description = <<-HELP
+  toggle the creation of Private Link/ PSC-related resources
+  HELP
+}
+
 variable "force_destroy_mgmt_bucket" {
   type        = bool
   default     = false
@@ -78,8 +116,4 @@ variable "psc_config" {
   description = <<-HELP
   PSC configuration
   HELP
-}
-
-variable "gke_master_ipv4_cidr_block" {
-  default = "10.3.0.0/28"
 }
