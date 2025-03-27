@@ -1,11 +1,12 @@
-resource "google_project_iam_custom_role" "customer_user_role" {
-  role_id     = replace("byovpc_customer_user_role${local.postfix}", "-", "_")
-  title       = "BYOVPC Customer User Role"
+resource "google_project_iam_custom_role" "test_user_role" {
+  role_id     = replace("byovpc_test_user_role${local.postfix}", "-", "_")
+  title       = "BYOVPC Test User Role"
   project     = var.service_project_id
   description = <<EOT
-  The role that a customer might use when running rpk.
-  It has limited access to create things (in particular you cannot create service accounts, storage buckets, enable
-  APIs, etc).
+  An example role, provided only for documentation and testing purposes. Represents the minimum required permissions
+  for running 'rpk byoc apply' when creating a BYOVPC cluster. Likely your organization already has user roles that
+  you will choose to use, as long as those users have at least these permissions you will be able to successfully
+  run 'rpk byoc apply'.
   EOT
   permissions = [
     // required for pre-requisite validation
@@ -49,25 +50,25 @@ resource "google_project_iam_custom_role" "customer_user_role" {
   ]
 }
 
-resource "google_service_account" "customer_user_account" {
-  count        = var.create_customer_user ? 1 : 0
-  account_id   = "byovpc-customer${local.postfix}"
-  display_name = "The account that should be used when creating the agent using rpk"
+resource "google_service_account" "test_user_account" {
+  count        = var.create_test_user ? 1 : 0
+  account_id   = "byovpc-test-user${local.postfix}"
+  display_name = "An account that may be used, for testing purposes, when running rpk to create a cluster."
   project      = var.service_project_id
 }
 
-resource "google_project_iam_member" "customer_user_role_binding" {
-  count   = var.create_customer_user ? 1 : 0
+resource "google_project_iam_member" "test_user_role_binding" {
+  count   = var.create_test_user ? 1 : 0
   project = var.service_project_id
-  role    = google_project_iam_custom_role.customer_user_role.id
-  member  = "serviceAccount:${google_service_account.customer_user_account[0].email}"
+  role    = google_project_iam_custom_role.test_user_role.id
+  member  = "serviceAccount:${google_service_account.test_user_account[0].email}"
 }
 
-resource "google_project_iam_member" "rpk_user_shared_vpc_permissions" {
-  count   = local.using_shared_vpc && var.create_customer_user ? 1 : 0
+resource "google_project_iam_member" "test_user_shared_vpc_permissions" {
+  count   = local.using_shared_vpc && var.create_test_user ? 1 : 0
   project = var.network_project_id
-  role    = var.rpk_user_custom_role
-  member  = "serviceAccount:${google_service_account.customer_user_account[0].email}"
+  role    = var.network_project_test_user_role
+  member  = "serviceAccount:${google_service_account.test_user_account[0].email}"
   lifecycle {
     create_before_destroy = true
   }

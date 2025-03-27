@@ -34,11 +34,12 @@ variable "shared_vpc_custom_role" {
   HELP
 }
 
-variable "rpk_user_custom_role" {
+variable "network_project_test_user_role" {
   type        = string
   default     = ""
   description = <<-HELP
-  id of the role in the host project we want to grant to the rpk user
+  If using the shared VPC model this role grants the required permissions to the test user in the network project.
+  Not commonly used in a production setting. Test user is provided only for documentation and testing purposes.
   HELP
 }
 
@@ -77,12 +78,12 @@ variable "unique_identifier" {
   HELP
 }
 
-variable "create_customer_user" {
+variable "create_test_user" {
   type        = bool
   default     = false
   description = <<-HELP
-  Whether or not to create the customer user service account. The customer user service account is used to simulate a
-  user with limited permissions when running rpk.
+  When true a test user will be created with the minimum necessary permissions for running 'rpk byoc apply'
+  Not commonly used in a production setting. Test user is provided only for documentation and testing purposes.
   HELP
 }
 

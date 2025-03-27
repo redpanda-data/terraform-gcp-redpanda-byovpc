@@ -18,7 +18,7 @@ module "redpanda_gcp" {
   enable_private_link       = true
   force_destroy_mgmt_bucket = var.environment == "dev" ? true : false
   max_redpanda_node_count   = 10
-  create_customer_user      = true
+  create_test_user          = true
 }
 variable "project_id" {
   description = "The Google Cloud project ID"

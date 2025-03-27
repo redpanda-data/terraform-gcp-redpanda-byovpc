@@ -62,6 +62,6 @@ output "redpanda_connect_api_service_account_email" {
   value = google_service_account.redpanda_connect_api.email
 }
 
-output "customer_user_account" {
-  value = var.create_customer_user ? google_service_account.customer_user_account[0].account_id : ""
+output "test_user_account" {
+  value = var.create_test_user ? google_service_account.test_user_account[0].account_id : ""
 }
