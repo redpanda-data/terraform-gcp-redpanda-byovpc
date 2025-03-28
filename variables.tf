@@ -150,6 +150,7 @@ variable "subnet_name" {
   The name of the subnet if created outside of this module. If vpc_name is provided, this value is required.
   HELP
   validation {
+# We expect that when vpc_name and subnet_name are both nil or both not nil, this should pass. Otherwise, this should fail. 
     condition     = (var.vpc_name == "") == (var.subnet_name == "")
     error_message = "If vpc_name is provided, subnet_name is required"
   }
