@@ -74,6 +74,7 @@ resource "google_project_iam_custom_role" "network_project_test_user_role" {
     "resourcemanager.projects.get",
     "compute.subnetworks.get",
     "compute.subnetworks.getIamPolicy",
+    "compute.networks.get",
     "compute.networks.getRegionEffectiveFirewalls",
     "resourcemanager.projects.getIamPolicy",
     "iam.roles.get",
