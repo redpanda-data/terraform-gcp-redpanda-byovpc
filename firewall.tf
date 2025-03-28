@@ -1,7 +1,7 @@
 resource "google_compute_firewall" "redpanda_ingress_allow_redpanda" {
   name        = "redpanda-ingress${local.postfix}"
   description = "Allow access to Redpanda cluster"
-  network     = google_compute_network.redpanda.name
+  network     = data.google_compute_network.redpanda.name
   project     = var.network_project_id
 
   allow {
@@ -27,7 +27,7 @@ resource "google_compute_firewall" "redpanda_ingress_allow_psc" {
   count       = var.enable_private_link ? 1 : 0
   name        = "redpanda-ingress${local.postfix}-psc"
   description = "Allow access to Redpanda cluster"
-  network     = google_compute_network.redpanda.name
+  network     = data.google_compute_network.redpanda.name
   project     = var.network_project_id
 
   allow {
@@ -60,7 +60,7 @@ resource "google_compute_firewall" "master_webhooks" {
   name        = "gke-rp-cluster-webhooks${local.postfix}"
   description = "Managed by terraform gke module: Allow master to hit pods for admission controllers/webhooks"
   project     = var.network_project_id
-  network     = google_compute_network.redpanda.name
+  network     = data.google_compute_network.redpanda.name
   priority    = 1000
   direction   = "INGRESS"
 

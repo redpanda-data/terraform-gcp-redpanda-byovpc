@@ -7,7 +7,7 @@ resource "google_compute_subnetwork" "psc_nat" {
   region        = var.region
   ip_cidr_range = var.psc_nat_subnet_ipv4_range
   purpose       = "PRIVATE_SERVICE_CONNECT"
-  network       = google_compute_network.redpanda.id
+  network       = data.google_compute_network.redpanda.id
   project       = var.network_project_id
 }
 
