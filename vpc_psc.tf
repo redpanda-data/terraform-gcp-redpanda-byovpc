@@ -15,6 +15,7 @@ resource "google_compute_subnetwork" "psc_nat" {
 }
 
 data "google_compute_subnetwork" "psc_nat" {
+  count = local.create_psc_subnetwork ? 1 : 0
   name    = local.create_psc_subnetwork ? google_compute_subnetwork.psc_nat[0].name : var.psc_subnet_name
   region  = var.region
   project = var.network_project_id
@@ -34,8 +35,8 @@ data "google_iam_policy" "nat_subnet_iam" {
 # Required so the service attachment can use the PSC NAT subnet, which exists in the HOST project.
 resource "google_compute_subnetwork_iam_policy" "nat_subnet_policy" {
   count       = local.is_shared_vpc && var.enable_private_link ? 1 : 0
-  project     = data.google_compute_subnetwork.psc_nat.project
-  region      = data.google_compute_subnetwork.psc_nat.region
-  subnetwork  = data.google_compute_subnetwork.psc_nat.name
+  project     = data.google_compute_subnetwork.psc_nat[0].project
+  region      = data.google_compute_subnetwork.psc_nat[0].region
+  subnetwork  = data.google_compute_subnetwork.psc_nat[0].name
   policy_data = data.google_iam_policy.nat_subnet_iam[0].policy_data
 }

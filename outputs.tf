@@ -34,7 +34,7 @@ output "gke_service_account_email" {
 }
 
 output "psc_nat_subnet_name" {
-  value       = var.enable_private_link ? data.google_compute_subnetwork.psc_nat.name : ""
+  value       = var.enable_private_link ? data.google_compute_subnetwork.psc_nat[0].name : ""
   description = "The name of the PSC NAT subnet, if private link is enabled."
 }
 

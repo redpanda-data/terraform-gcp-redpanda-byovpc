@@ -118,12 +118,22 @@ variable "psc_subnet_name" {
     The name of the PSC subnet if created outside of this module. If vpc_name is provided and private link is enabled,
     this value is required.
     HELP
-  validation {
-    #    If private link is not enabled, psc_subnet_name should not be provided
-    #    If private link is enabled and vpc_name is provided, psc_subnet_name is required
-    #    If private link is enabled and vpc_name is not provided, psc_subnet_name should not be provided
-    condition     = (!var.enable_private_link && var.psc_subnet_name == "") || (var.enable_private_link && (var.vpc_name == "") == (var.psc_subnet_name == ""))
-    error_message = "If private link is enabled and vpc_name is provided, psc_subnet_name is required"
+}
+
+resource "terraform_data" "validation" {
+  input = "validation-only"
+
+  #    If private link is not enabled, psc_subnet_name should not be provided
+  #    If private link is enabled and vpc_name is provided, psc_subnet_name is required
+  #    If private link is enabled and vpc_name is not provided, psc_subnet_name should not be provided
+  lifecycle {
+    precondition {
+      condition = (
+      (!var.enable_private_link && var.psc_subnet_name == "") ||
+      (var.enable_private_link && (var.vpc_name == "") == (var.psc_subnet_name == ""))
+      )
+      error_message = "Configuration error: If private link is enabled and vpc_name is provided, psc_subnet_name is required. If private link is not enabled, psc_subnet_name should not be provided."
+    }
   }
 }
 
@@ -149,10 +159,16 @@ variable "subnet_name" {
   description = <<-HELP
   The name of the subnet if created outside of this module. If vpc_name is provided, this value is required.
   HELP
-  validation {
-# We expect that when vpc_name and subnet_name are both nil or both not nil, this should pass. Otherwise, this should fail. 
-    condition     = (var.vpc_name == "") == (var.subnet_name == "")
-    error_message = "If vpc_name is provided, subnet_name is required"
+}
+
+resource "terraform_data" "subnet_validation" {
+  input = "validation-only"
+  # We expect that when vpc_name and subnet_name are both nil or both not nil, this should pass. Otherwise, this should fail.
+  lifecycle {
+    precondition {
+      condition     = (var.vpc_name == "") == (var.subnet_name == "")
+      error_message = "If vpc_name is provided, subnet_name is required. Both must be either specified or unspecified."
+    }
   }
 }
 
