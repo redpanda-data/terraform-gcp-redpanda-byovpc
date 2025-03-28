@@ -37,15 +37,15 @@ resource "google_compute_subnetwork" "redpanda" {
   name                     = "redpanda-subnetwork${local.postfix}"
   network                  = data.google_compute_network.redpanda.id
   region                   = var.region
-  ip_cidr_range            = "10.0.0.0/24"
+  ip_cidr_range            = var.subnetwork_ip_cidr_range
   private_ip_google_access = true
   stack_type               = "IPV4_ONLY"
   secondary_ip_range {
-    ip_cidr_range = "10.0.8.0/21"
+    ip_cidr_range = var.subnetwork_pods_secondary_ip_range
     range_name    = var.secondary_ipv4_range_pods_name
   }
   secondary_ip_range {
-    ip_cidr_range = "10.0.1.0/24"
+    ip_cidr_range = var.subnetwork_services_secondary_ip_range
     range_name    = var.secondary_ipv4_range_services_name
   }
   depends_on = [

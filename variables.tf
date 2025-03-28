@@ -154,3 +154,27 @@ variable "secondary_ipv4_range_services_name" {
     The name of the secondary IP range for services
     HELP
 }
+
+variable "subnetwork_ip_cidr_range" {
+  type        = string
+  default     = "10.0.0.0/24"
+  description = <<-HELP
+    The IP CIDR range of the subnetwork
+    HELP
+}
+
+variable "subnetwork_pods_secondary_ip_range" {
+  type        = string
+  default     = "10.0.8.0/21"
+  description = <<-HELP
+    The IP CIDR range of the subnetwork pods secondary IP range
+    HELP
+}
+
+variable "subnetwork_services_secondary_ip_range" {
+  type        = string
+  default     = "10.0.1.0/24"
+  description = <<-HELP
+    The IP CIDR range of the subnetwork services secondary IP range
+    HELP
+}
