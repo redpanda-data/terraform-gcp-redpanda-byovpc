@@ -167,7 +167,7 @@ resource "google_storage_bucket_iam_member" "redpanda_agent_storage_object_admin
 }
 
 resource "google_project_iam_member" "redpanda_agent_shared_vpc_permissions" {
-  count   = local.using_shared_vpc ? 1 : 0
+  count   = local.is_shared_vpc ? 1 : 0
   project = var.network_project_id
   role    = google_project_iam_custom_role.shared_vpc_redpanda_agent[0].id
   member  = "serviceAccount:${google_service_account.redpanda_agent.email}"
@@ -177,7 +177,7 @@ resource "google_project_iam_member" "redpanda_agent_shared_vpc_permissions" {
 }
 
 resource "google_project_iam_custom_role" "shared_vpc_redpanda_agent" {
-  count       = local.using_shared_vpc ? 1 : 0
+  count       = local.is_shared_vpc ? 1 : 0
   role_id     = replace("redpanda_agent_role_network${local.postfix}", "-", "_")
   title       = "Redpanda Agent Role"
   description = "A role granting the redpanda agent permissions to view network resources in the project of the vpc."

@@ -118,3 +118,63 @@ variable "psc_nat_subnet_ipv4_range" {
   The IPv4 CIDR range of the PSC NAT subnet
   HELP
 }
+
+variable "vpc_name" {
+  type        = string
+  default     = ""
+  description = <<-HELP
+  The name of the VPC network if created outside of this module
+  HELP
+}
+
+variable "subnet_name" {
+  type        = string
+  default     = ""
+  description = <<-HELP
+  The name of the subnet if created outside of this module. If vpc_name is provided, this value is required.
+  HELP
+  validation {
+    condition     = var.vpc_name != "" && var.subnet_name != ""
+    error_message = "If vpc_name is provided, subnet_name is required"
+  }
+}
+
+variable "secondary_ipv4_range_pods_name" {
+  type        = string
+  default     = "redpanda-pods"
+  description = <<-HELP
+    The name of the secondary IP range for pods
+    HELP
+}
+
+variable "secondary_ipv4_range_services_name" {
+  type        = string
+  default     = "redpanda-services"
+  description = <<-HELP
+    The name of the secondary IP range for services
+    HELP
+}
+
+variable "subnetwork_ip_cidr_range" {
+  type        = string
+  default     = "10.0.0.0/24"
+  description = <<-HELP
+    The IP CIDR range of the subnetwork
+    HELP
+}
+
+variable "subnetwork_pods_secondary_ip_range" {
+  type        = string
+  default     = "10.0.8.0/21"
+  description = <<-HELP
+    The IP CIDR range of the subnetwork pods secondary IP range
+    HELP
+}
+
+variable "subnetwork_services_secondary_ip_range" {
+  type        = string
+  default     = "10.0.1.0/24"
+  description = <<-HELP
+    The IP CIDR range of the subnetwork services secondary IP range
+    HELP
+}

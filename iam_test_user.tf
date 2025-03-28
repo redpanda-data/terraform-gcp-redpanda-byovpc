@@ -63,7 +63,7 @@ resource "google_project_iam_member" "test_user_role_binding" {
 }
 
 resource "google_project_iam_custom_role" "network_project_test_user_role" {
-  count       = local.using_shared_vpc ? 1 : 0
+  count       = local.is_shared_vpc ? 1 : 0
   role_id     = replace("byovpc_test_user_role${local.postfix}", "-", "_")
   title       = "BYOVPC Test User Role"
   description = <<EOT
@@ -84,7 +84,7 @@ resource "google_project_iam_custom_role" "network_project_test_user_role" {
 }
 
 resource "google_project_iam_member" "test_user_shared_vpc_permissions" {
-  count   = local.using_shared_vpc && var.create_test_user ? 1 : 0
+  count   = local.is_shared_vpc && var.create_test_user ? 1 : 0
   project = var.network_project_id
   role    = google_project_iam_custom_role.network_project_test_user_role[0].id
   member  = "serviceAccount:${google_service_account.test_user_account[0].email}"

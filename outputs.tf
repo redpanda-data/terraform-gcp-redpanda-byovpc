@@ -3,7 +3,7 @@ output "management_bucket_name" {
 }
 
 output "network_name" {
-  value = google_compute_network.redpanda.name
+  value = data.google_compute_network.redpanda.name
 }
 
 output "network_project_id" {
@@ -51,15 +51,15 @@ output "k8s_master_ipv4_range" {
 }
 
 output "subnet_name" {
-  value = google_compute_subnetwork.redpanda.name
+  value = data.google_compute_subnetwork.redpanda.name
 }
 
 output "secondary_ipv4_range_pods_name" {
-  value = google_compute_subnetwork.redpanda.secondary_ip_range.0.range_name
+  value = var.secondary_ipv4_range_pods_name
 }
 
 output "secondary_ipv4_range_services_name" {
-  value = google_compute_subnetwork.redpanda.secondary_ip_range.1.range_name
+  value = var.secondary_ipv4_range_services_name
 }
 
 output "tiered_storage_bucket_name" {
