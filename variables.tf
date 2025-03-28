@@ -15,7 +15,7 @@ variable "region" {
 variable "network_project_id" {
   type        = string
   description = <<-HELP
-  The project id of the vpc
+  The project id of the vpc. May be the same project as the service project or may be a host project. Required.
   HELP
 }
 
@@ -23,7 +23,7 @@ variable "enable_private_link" {
   type        = bool
   default     = false
   description = <<-HELP
-  toggle the creation of Private Link/ PSC-related resources
+  When true PSC-related resources will be created.
   HELP
 }
 
@@ -31,17 +31,17 @@ variable "force_destroy_mgmt_bucket" {
   type        = bool
   default     = false
   description = <<-HELP
-  When deleting the mgmt bucket, this boolean option will delete all contained objects. if you try to delete the mgmt
+  When deleting the mgmt bucket, this boolean option will delete all contained objects. If you try to delete the mgmt
   bucket without this option terraform will fail.
   HELP
 }
 
 variable "force_destroy_cloud_storage_bucket" {
   type        = bool
-  default     = true
+  default     = false
   description = <<-HELP
-  When deleting the cloud storage bucket, this boolean option will delete all contained objects. if you try to delete
-  the cloud storage bucket without this option terraform will fail.
+  When deleting the cloud storage bucket, this boolean option will delete all contained objects. If you try to delete
+  the cloud storage bucket without this option terraform will fail. Not recommended for production use.
   HELP
 }
 
@@ -98,8 +98,7 @@ variable "psc_config" {
 variable "gke_master_ipv4_cidr_block" {
   default     = "10.0.7.240/28"
   description = <<-HELP
-  A /28 CIDR is required for the GKE master IP addresses. This CIDR is not used in the GCP networking configuration,
-  but is input into the Redpanda UI; for example, 10.0.7.240/28.
+  A /28 CIDR is required for the GKE master IP addresses.
   HELP
 }
 
@@ -107,7 +106,8 @@ variable "attach_shared_vpc" {
   type        = bool
   default     = true
   description = <<-HELP
-  When true will create the shared_vpc_host_project and shared_vpc_service_project attachments.
+  When true will create the shared_vpc_host_project and shared_vpc_service_project attachments. In a shared VPC setup
+  this is typically a one time configuration and would commonly be done outside of this module.
   HELP
 }
 
