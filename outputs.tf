@@ -27,7 +27,7 @@ output "gke_service_account_email" {
 }
 
 output "psc_nat_subnet_name" {
-  value = var.enable_private_link ? google_compute_subnetwork.psc_nat[0].name : ""
+  value = var.enable_private_link ? data.google_compute_subnetwork.psc_nat.name : ""
 }
 
 output "redpanda_cluster_service_account_email" {

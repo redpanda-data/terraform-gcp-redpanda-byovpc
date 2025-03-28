@@ -111,6 +111,22 @@ variable "attach_shared_vpc" {
   HELP
 }
 
+variable "psc_subnet_name" {
+  type        = string
+  default     = ""
+  description = <<-HELP
+    The name of the PSC subnet if created outside of this module. If vpc_name is provided and private link is enabled,
+    this value is required.
+    HELP
+  validation {
+    #    If private link is not enabled, psc_subnet_name should not be provided
+    #    If private link is enabled and vpc_name is provided, psc_subnet_name is required
+    #    If private link is enabled and vpc_name is not provided, psc_subnet_name should not be provided
+    condition     = (!var.enable_private_link && var.psc_subnet_name == "") || (var.enable_private_link && (var.vpc_name == "") == (var.psc_subnet_name == ""))
+    error_message = "If private link is enabled and vpc_name is provided, psc_subnet_name is required"
+  }
+}
+
 variable "psc_nat_subnet_ipv4_range" {
   type        = string
   default     = "10.0.2.0/29"
@@ -134,7 +150,8 @@ variable "subnet_name" {
   The name of the subnet if created outside of this module. If vpc_name is provided, this value is required.
   HELP
   validation {
-    condition     = var.vpc_name != "" && var.subnet_name != ""
+# We expect that when vpc_name and subnet_name are both nil or both not nil, this should pass. Otherwise, this should fail. 
+    condition     = (var.vpc_name == "") == (var.subnet_name == "")
     error_message = "If vpc_name is provided, subnet_name is required"
   }
 }
