@@ -38,6 +38,11 @@ output "psc_nat_subnet_name" {
   description = "The name of the PSC NAT subnet, if private link is enabled."
 }
 
+output "psc_nat_subnet_id" {
+  value       = var.enable_private_link ? data.google_compute_subnetwork.psc_nat[0].id : ""
+  description = "The id of the PSC NAT subnet, if private link is enabled."
+}
+
 output "redpanda_cluster_service_account_email" {
   value       = google_service_account.redpanda_cluster.email
   description = "The email address of the service account used by the redpanda cluster."
