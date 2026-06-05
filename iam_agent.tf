@@ -2,9 +2,10 @@ locals {
   service_project_core_agent_permissions = [
     "compute.firewalls.get",
     "compute.globalOperations.get",
-    "compute.disks.get",       # required for applying custom labels via go code
-    "compute.disks.list",      # required for applying custom labels via go code
-    "compute.disks.setLabels", # required for applying custom labels via go code
+    "compute.globalOperations.list", # required for detection/details of quota/stockout errors and incident investigation
+    "compute.disks.get",             # required for applying custom labels via go code
+    "compute.disks.list",            # required for applying custom labels via go code
+    "compute.disks.setLabels",       # required for applying custom labels via go code
     "compute.instanceGroupManagers.get",
     "compute.instanceGroupManagers.delete",
     "compute.instanceGroupManagers.update",
@@ -17,6 +18,7 @@ locals {
     "compute.networks.getRegionEffectiveFirewalls",
     "compute.networks.getEffectiveFirewalls",
     "compute.projects.get",
+    "compute.regionOperations.list", # required for detection/details of quota/stockout errors and incident investigation
     "compute.subnetworks.get",
     "compute.subnetworks.getIamPolicy", # required for validation/drift-detection
     "compute.zoneOperations.get",
