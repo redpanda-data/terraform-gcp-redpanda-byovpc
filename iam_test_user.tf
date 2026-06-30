@@ -42,6 +42,7 @@ resource "google_project_iam_custom_role" "test_user_role" {
     "compute.instanceTemplates.delete",
     "compute.instanceGroups.create",
     "compute.instanceGroupManagers.get",
+    "compute.instanceGroupManagers.list",
     "iam.serviceAccounts.actAs",
     "compute.instanceGroupManagers.delete",
     "compute.instanceGroups.delete",
