@@ -7,6 +7,7 @@ locals {
     "compute.disks.list",            # required for applying custom labels via go code
     "compute.disks.setLabels",       # required for applying custom labels via go code
     "compute.instanceGroupManagers.get",
+    "compute.instanceGroupManagers.list",
     "compute.instanceGroupManagers.delete",
     "compute.instanceGroupManagers.update",
     "compute.instanceGroups.delete",
