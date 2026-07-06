@@ -92,3 +92,18 @@ output "test_user_account" {
   value       = var.create_test_user ? google_service_account.test_user_account[0].account_id : ""
   description = "The email address of the test user account, if created."
 }
+
+output "redpanda_sql_api_service_account_email" {
+  value       = var.enable_redpanda_sql ? google_service_account.redpanda_sql_api[0].email : ""
+  description = "The Redpanda SQL API Service Account email"
+}
+
+output "redpanda_sql_service_account_email" {
+  value       = var.enable_redpanda_sql ? google_service_account.redpanda_sql[0].email : ""
+  description = "The Redpanda SQL Service Account email"
+}
+
+output "redpanda_sql_storage_bucket_name" {
+  value       = var.enable_redpanda_sql ? google_storage_bucket.redpanda_sql[0].name : ""
+  description = "The Redpanda SQL storage bucket name"
+}

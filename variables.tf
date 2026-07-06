@@ -27,6 +27,22 @@ variable "enable_private_link" {
   HELP
 }
 
+variable "enable_redpanda_sql" {
+  type        = bool
+  default     = false
+  description = <<-HELP
+  When true, Redpanda SQL resources will be created
+  HELP
+}
+
+variable "force_destroy_sql_storage_bucket" {
+  type        = bool
+  default     = false
+  description = <<-HELP
+  When deleting the Redpanda SQL bucket, this boolean option will delete all contained objects.
+  HELP
+}
+
 variable "force_destroy_mgmt_bucket" {
   type        = bool
   default     = false
