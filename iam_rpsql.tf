@@ -18,6 +18,19 @@ resource "google_project_iam_custom_role" "redpanda_sql_api_secrets_access" {
   ]
 }
 
+resource "google_project_iam_member" "redpanda_sql_api_secrets_access" {
+  count   = var.enable_redpanda_sql ? 1 : 0
+  project = var.service_project_id
+  role    = google_project_iam_custom_role.redpanda_sql_api_secrets_access[0].id
+  member  = "serviceAccount:${google_service_account.redpanda_sql_api[0].email}"
+
+  condition {
+    title       = "RPSqlSecretsRestriction"
+    description = "Restrict access to Redpanda SQL Secret Manager prefix"
+    expression  = "resource.name.startsWith('projects/_/secrets/${local.rpsql_secret_manager_prefix}')"
+  }
+}
+
 resource "google_service_account_iam_member" "redpanda_sql_api_workload_identity" {
   count              = var.enable_redpanda_sql ? 1 : 0
   service_account_id = google_service_account.redpanda_sql_api[0].name
@@ -57,7 +70,7 @@ resource "google_project_iam_member" "redpanda_sql_cluster_storage" {
   condition {
     title       = "RPSqlPathRestriction"
     description = "Restrict access to oxla prefix only"
-    expression  = "resource.name.startsWith('projects/${var.service_project_id}/buckets/${google_storage_bucket.redpanda_sql[0].name}/objects/oxla')"
+    expression  = "resource.name.startsWith('projects/_/buckets/${google_storage_bucket.redpanda_sql[0].name}/objects/oxla')"
   }
 
   depends_on = [google_storage_bucket.redpanda_sql]
@@ -83,7 +96,7 @@ resource "google_project_iam_member" "redpanda_sql_cluster_storage_list" {
   condition {
     title       = "RPSqlListRestriction"
     description = "Restrict access to oxla prefix only"
-    expression  = "resource.name.startsWith('projects/${var.service_project_id}/buckets/${google_storage_bucket.redpanda_sql[0].name}')"
+    expression  = "resource.name.startsWith('projects/_/buckets/${google_storage_bucket.redpanda_sql[0].name}')"
   }
 
   depends_on = [google_storage_bucket.redpanda_sql]

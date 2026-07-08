@@ -107,3 +107,8 @@ output "redpanda_sql_storage_bucket_name" {
   value       = var.enable_redpanda_sql ? google_storage_bucket.redpanda_sql[0].name : ""
   description = "The Redpanda SQL storage bucket name"
 }
+
+output "redpanda_sql_secret_manager_prefix" {
+  value       = var.enable_redpanda_sql ? local.rpsql_secret_manager_prefix : ""
+  description = "The Secret Manager prefix for Redpanda SQL catalog credentials."
+}
