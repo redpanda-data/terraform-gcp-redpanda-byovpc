@@ -108,3 +108,30 @@ resource "google_service_account_iam_member" "redpanda_oxla_cluster_workload_ide
   role               = "roles/iam.workloadIdentityUser"
   member             = "serviceAccount:${var.service_project_id}.svc.id.goog[redpanda-oxla/${google_service_account.redpanda_sql[0].account_id}]"
 }
+
+resource "google_project_iam_custom_role" "redpanda_sql_iceberg_storage" {
+  count   = var.enable_redpanda_sql ? 1 : 0
+  project = var.service_project_id
+  role_id = replace("redpanda_sql_storage_iceberg${local.postfix}", "-", "_")
+  title   = "Redpanda SQL Iceberg Storage Role"
+  permissions = [
+    "storage.objects.create",
+    "storage.objects.delete",
+    "storage.objects.get",
+    "storage.objects.list",
+  ]
+}
+
+resource "google_project_iam_member" "redpanda_sql_iceberg_storage" {
+  count   = var.enable_redpanda_sql ? 1 : 0
+  project = var.service_project_id
+  role    = google_project_iam_custom_role.redpanda_sql_iceberg_storage[0].id
+  member  = "serviceAccount:${google_service_account.redpanda_sql[0].email}"
+
+  condition {
+    title       = "IcebergBucketRestriction"
+    description = "Restrict Iceberg access to the Redpanda cloud storage bucket"
+    expression  = "resource.name.startsWith('projects/_/buckets/${google_storage_bucket.redpanda_cloud_storage.name}')"
+  }
+}
+
