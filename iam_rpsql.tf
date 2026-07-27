@@ -135,3 +135,32 @@ resource "google_project_iam_member" "redpanda_sql_iceberg_storage" {
   }
 }
 
+# BigLake (Iceberg REST catalog on GCP) grants for the Redpanda SQL cluster SA.
+# Mirrors the grants Redpanda applies for Redpanda-managed clusters; for BYOVPC
+# the customer's own module (this one) is responsible for them.
+
+# Storage Admin — access to the underlying BigLake storage bucket, which may differ
+# from the tiered-storage bucket, so this is project-wide rather than bucket-scoped.
+resource "google_project_iam_member" "redpanda_sql_storage_admin" {
+  count   = var.enable_redpanda_sql ? 1 : 0
+  project = var.service_project_id
+  role    = "roles/storage.objectAdmin"
+  member  = "serviceAccount:${google_service_account.redpanda_sql[0].email}"
+}
+
+# BigLake Editor — access the Iceberg REST catalog via the BigLake API.
+resource "google_project_iam_member" "redpanda_sql_biglake_editor" {
+  count   = var.enable_redpanda_sql ? 1 : 0
+  project = var.service_project_id
+  role    = "roles/biglake.editor"
+  member  = "serviceAccount:${google_service_account.redpanda_sql[0].email}"
+}
+
+# Service Usage Consumer — required by BigLake to interact with GCP services.
+resource "google_project_iam_member" "redpanda_sql_service_usage_consumer" {
+  count   = var.enable_redpanda_sql ? 1 : 0
+  project = var.service_project_id
+  role    = "roles/serviceusage.serviceUsageConsumer"
+  member  = "serviceAccount:${google_service_account.redpanda_sql[0].email}"
+}
+
