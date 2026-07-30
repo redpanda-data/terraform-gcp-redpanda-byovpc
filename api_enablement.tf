@@ -67,3 +67,18 @@ resource "google_project_service" "network_project_container_api" {
   disable_on_destroy         = false
   project                    = var.network_project_id
 }
+
+resource "google_project_service" "biglake_api" {
+  service                    = "biglake.googleapis.com"
+  disable_dependent_services = false
+  disable_on_destroy         = false
+  project                    = var.service_project_id
+}
+
+# BigLake is built on BigQuery; the BigQuery API must also be enabled.
+resource "google_project_service" "bigquery_api" {
+  service                    = "bigquery.googleapis.com"
+  disable_dependent_services = false
+  disable_on_destroy         = false
+  project                    = var.service_project_id
+}

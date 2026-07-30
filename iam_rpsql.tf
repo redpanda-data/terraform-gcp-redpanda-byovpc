@@ -135,3 +135,24 @@ resource "google_project_iam_member" "redpanda_sql_iceberg_storage" {
   }
 }
 
+# BigLake (Iceberg REST catalog on GCP) grants for the Redpanda SQL cluster SA.
+# Mirrors the grants Redpanda applies for Redpanda-managed clusters
+# BigLake warehouse bucket is already covered above (redpanda_sql_iceberg_storage,
+# scoped to the redpanda_cloud_storage bucket) — no separate warehouse bucket is in play.
+
+# BigLake Editor — access the Iceberg REST catalog via the BigLake API.
+resource "google_project_iam_member" "redpanda_sql_biglake_editor" {
+  count   = var.enable_redpanda_sql ? 1 : 0
+  project = var.service_project_id
+  role    = "roles/biglake.editor"
+  member  = "serviceAccount:${google_service_account.redpanda_sql[0].email}"
+}
+
+# Service Usage Consumer — required by BigLake to interact with GCP services.
+resource "google_project_iam_member" "redpanda_sql_service_usage_consumer" {
+  count   = var.enable_redpanda_sql ? 1 : 0
+  project = var.service_project_id
+  role    = "roles/serviceusage.serviceUsageConsumer"
+  member  = "serviceAccount:${google_service_account.redpanda_sql[0].email}"
+}
+
