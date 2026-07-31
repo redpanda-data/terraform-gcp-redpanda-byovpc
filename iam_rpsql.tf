@@ -27,7 +27,7 @@ resource "google_project_iam_member" "redpanda_sql_api_secrets_access" {
   condition {
     title       = "RPSqlSecretsRestriction"
     description = "Restrict access to Redpanda SQL Secret Manager prefix"
-    expression  = "resource.name.startsWith('projects/_/secrets/${local.rpsql_secret_manager_prefix}')"
+    expression  = "resource.name.startsWith('projects/${var.service_project_id}/secrets/redpanda-')"
   }
 }
 

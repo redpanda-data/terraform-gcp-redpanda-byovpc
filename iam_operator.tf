@@ -8,7 +8,7 @@ resource "google_service_account" "redpanda_operator" {
 resource "google_service_account_iam_member" "redpanda_operator_service_account_binding" {
   service_account_id = google_service_account.redpanda_operator.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.service_project_id}.svc.id.goog[redpanda-system/redpanda-operator-sa]"
+  member             = "serviceAccount:${var.service_project_id}.svc.id.goog[redpanda-system/${google_service_account.redpanda_operator.account_id}]"
 }
 
 resource "google_project_iam_custom_role" "redpanda_operator_custom_role" {
