@@ -92,14 +92,16 @@ resource "google_compute_router_nat" "redpanda" {
   project = var.network_project_id
 }
 
+# Project number of the service project, needed for the shared VPC grants below and for the Redpanda SQL
+# Secret Manager IAM condition.
+data "google_project" "service_project" {
+  count      = local.is_shared_vpc || var.enable_redpanda_sql ? 1 : 0
+  project_id = var.service_project_id
+}
+
 # The following attaches the required permissions to the GKE service account and Google API service account of the
 # SERVICE PROJECT in the HOST PROJECT
 # This is a good document showing these steps: https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-shared-vpc
-
-data "google_project" "service_project" {
-  count      = local.is_shared_vpc ? 1 : 0
-  project_id = var.service_project_id
-}
 
 data "google_iam_policy" "subnetwork_iam" {
   count = local.create_vpc && local.is_shared_vpc ? 1 : 0
