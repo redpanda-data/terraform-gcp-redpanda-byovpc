@@ -24,10 +24,12 @@ resource "google_project_iam_member" "redpanda_sql_api_secrets_access" {
   role    = google_project_iam_custom_role.redpanda_sql_api_secrets_access[0].id
   member  = "serviceAccount:${google_service_account.redpanda_sql_api[0].email}"
 
+  # Secret Manager resource names in IAM Conditions use the project number, never the project ID:
+  # https://cloud.google.com/iam/docs/conditions-resource-attributes#resource-name
   condition {
     title       = "RPSqlSecretsRestriction"
     description = "Restrict access to Redpanda SQL Secret Manager prefix"
-    expression  = "resource.name.startsWith('projects/${var.service_project_id}/secrets/redpanda-')"
+    expression  = "resource.name.startsWith('projects/${data.google_project.service_project[0].number}/secrets/redpanda-')"
   }
 }
 
