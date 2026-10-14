@@ -5,7 +5,7 @@ steps:
   - label: TFLint
     plugins:
       - docker#v3.8.0:
-          image: "ghcr.io/terraform-linters/tflint:latest"
+          image: "ghcr.io/terraform-linters/tflint:v0.64.0"
           command: [ "--recursive" ]
           workdir: "/workdir"
           volumes:

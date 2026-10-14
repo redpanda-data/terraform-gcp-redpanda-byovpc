@@ -112,6 +112,7 @@ variable "psc_config" {
 }
 
 variable "gke_master_ipv4_cidr_block" {
+  type        = string
   default     = "10.0.7.240/28"
   description = <<-HELP
   A /28 CIDR is required for the GKE master IP addresses.
@@ -145,8 +146,8 @@ resource "terraform_data" "validation" {
   lifecycle {
     precondition {
       condition = (
-      (!var.enable_private_link && var.psc_subnet_name == "") ||
-      (var.enable_private_link && (var.vpc_name == "") == (var.psc_subnet_name == ""))
+        (!var.enable_private_link && var.psc_subnet_name == "") ||
+        (var.enable_private_link && (var.vpc_name == "") == (var.psc_subnet_name == ""))
       )
       error_message = "Configuration error: If private link is enabled and vpc_name is provided, psc_subnet_name is required. If private link is not enabled, psc_subnet_name should not be provided."
     }
