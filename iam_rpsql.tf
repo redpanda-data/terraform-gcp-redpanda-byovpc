@@ -78,7 +78,7 @@ resource "google_project_iam_member" "redpanda_sql_cluster_storage" {
   depends_on = [google_storage_bucket.redpanda_sql]
 }
 
-# storage.objects.list permission is granted at the bucket level and cannot be name scoped.
+# storage.objects.list is checked on the bucket, so it cannot be scoped to the oxla prefix.
 resource "google_project_iam_custom_role" "redpanda_sql_cluster_storage_list" {
   count   = var.enable_redpanda_sql ? 1 : 0
   project = var.service_project_id
@@ -97,8 +97,14 @@ resource "google_project_iam_member" "redpanda_sql_cluster_storage_list" {
 
   condition {
     title       = "RPSqlListRestriction"
-    description = "Restrict access to oxla prefix only"
-    expression  = "resource.name.startsWith('projects/_/buckets/${google_storage_bucket.redpanda_sql[0].name}')"
+    description = "Restrict list access to the Redpanda SQL bucket"
+    # The exact match keeps buckets that only share this name as a prefix out.
+    expression = "resource.name == 'projects/_/buckets/${google_storage_bucket.redpanda_sql[0].name}'"
+  }
+
+  lifecycle {
+    # The condition is ForceNew; bind the new one before the old one goes so listing never loses access.
+    create_before_destroy = true
   }
 
   depends_on = [google_storage_bucket.redpanda_sql]
@@ -116,9 +122,8 @@ resource "google_project_iam_custom_role" "redpanda_sql_iceberg_storage" {
   project = var.service_project_id
   role_id = replace("redpanda_sql_storage_iceberg${local.postfix}", "-", "_")
   title   = "Redpanda SQL Iceberg Storage Role"
+  # Read-only: the broker writes the data files and the catalog owns the metadata.
   permissions = [
-    "storage.objects.create",
-    "storage.objects.delete",
     "storage.objects.get",
     "storage.objects.list",
   ]
@@ -133,21 +138,37 @@ resource "google_project_iam_member" "redpanda_sql_iceberg_storage" {
   condition {
     title       = "IcebergBucketRestriction"
     description = "Restrict Iceberg access to the Redpanda cloud storage bucket"
-    expression  = "resource.name.startsWith('projects/_/buckets/${google_storage_bucket.redpanda_cloud_storage.name}')"
+    # The exact match keeps buckets that only share this name as a prefix out.
+    expression = "resource.name == 'projects/_/buckets/${google_storage_bucket.redpanda_cloud_storage.name}' || resource.name.startsWith('projects/_/buckets/${google_storage_bucket.redpanda_cloud_storage.name}/objects/')"
+  }
+
+  lifecycle {
+    # The condition is ForceNew; bind the new one before the old one goes so reads never lose access.
+    create_before_destroy = true
   }
 }
 
-# BigLake (Iceberg REST catalog on GCP) grants for the Redpanda SQL cluster SA.
+# Read-only BigLake (Iceberg REST catalog on GCP) grants for the Redpanda SQL cluster SA.
 # Mirrors the grants Redpanda applies for Redpanda-managed clusters
 # BigLake warehouse bucket is already covered above (redpanda_sql_iceberg_storage,
 # scoped to the redpanda_cloud_storage bucket) — no separate warehouse bucket is in play.
 
-# BigLake Editor — access the Iceberg REST catalog via the BigLake API.
-resource "google_project_iam_member" "redpanda_sql_biglake_editor" {
+# BigLake Viewer — read the Iceberg REST catalog via the BigLake API.
+resource "google_project_iam_member" "redpanda_sql_biglake_viewer" {
   count   = var.enable_redpanda_sql ? 1 : 0
   project = var.service_project_id
-  role    = "roles/biglake.editor"
+  role    = "roles/biglake.viewer"
   member  = "serviceAccount:${google_service_account.redpanda_sql[0].email}"
+
+  lifecycle {
+    # The role is ForceNew; grant viewer before editor goes so catalog reads never lose access.
+    create_before_destroy = true
+  }
+}
+
+moved {
+  from = google_project_iam_member.redpanda_sql_biglake_editor
+  to   = google_project_iam_member.redpanda_sql_biglake_viewer
 }
 
 # Service Usage Consumer — required by BigLake to interact with GCP services.
