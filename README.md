@@ -8,13 +8,20 @@ account gets:
 
 - Read/write on the `oxla*` objects in its own bucket, and list on that
   bucket.
-- Read-only access to the cloud storage bucket for Iceberg topic data
+- Read access to the whole cloud storage bucket for Iceberg data
   (`storage.objects.get` and `storage.objects.list`), matched by exact
-  bucket name. The brokers write the topic data; Redpanda SQL only reads it.
-- `roles/biglake.viewer` and `roles/serviceusage.serviceUsageConsumer`, to
-  read a BigLake Iceberg REST catalog in the service project.
+  bucket name.
+- Write access to the cloud storage bucket only under the `rpsql_` prefix
+  (`storage.objects.create` and `storage.objects.delete`; overwriting an
+  object needs both), where Redpanda SQL writes its Iceberg data. The topic
+  data the brokers write stays read-only for Redpanda SQL.
+- `roles/biglake.editor` and `roles/serviceusage.serviceUsageConsumer`, to
+  read and write a BigLake Iceberg REST catalog in the service project.
 
-Upgrading from a version that granted write access replaces the Iceberg and
-list bindings and moves BigLake from `roles/biglake.editor` to
-`roles/biglake.viewer`. The new bindings are created before the old ones are
-removed, so queries keep working and no extra step is needed.
+Upgrading from v1.0.5 adds the Iceberg write role and its binding, and
+replaces the BigLake binding: the `roles/biglake.editor` binding is created
+before the `roles/biglake.viewer` one is removed, so queries keep working.
+Upgrading from v1.0.4 adds the same write role and binding, narrows the
+Iceberg storage role to read and replaces the Iceberg and list bindings,
+creating the new bindings first; the BigLake binding stays on
+`roles/biglake.editor`. No extra step is needed.

@@ -122,7 +122,7 @@ resource "google_project_iam_custom_role" "redpanda_sql_iceberg_storage" {
   project = var.service_project_id
   role_id = replace("redpanda_sql_storage_iceberg${local.postfix}", "-", "_")
   title   = "Redpanda SQL Iceberg Storage Role"
-  # Read-only: the broker writes the data files and the catalog owns the metadata.
+  # Bucket-wide read; writes go through the Iceberg write role, under the rpsql_ prefix only.
   permissions = [
     "storage.objects.get",
     "storage.objects.list",
@@ -148,27 +148,54 @@ resource "google_project_iam_member" "redpanda_sql_iceberg_storage" {
   }
 }
 
-# Read-only BigLake (Iceberg REST catalog on GCP) grants for the Redpanda SQL cluster SA.
-# Mirrors the grants Redpanda applies for Redpanda-managed clusters
-# BigLake warehouse bucket is already covered above (redpanda_sql_iceberg_storage,
-# scoped to the redpanda_cloud_storage bucket) — no separate warehouse bucket is in play.
-
-# BigLake Viewer — read the Iceberg REST catalog via the BigLake API.
-resource "google_project_iam_member" "redpanda_sql_biglake_viewer" {
+resource "google_project_iam_custom_role" "redpanda_sql_iceberg_write" {
   count   = var.enable_redpanda_sql ? 1 : 0
   project = var.service_project_id
-  role    = "roles/biglake.viewer"
+  role_id = replace("redpanda_sql_iceberg_write${local.postfix}", "-", "_")
+  title   = "Redpanda SQL Iceberg Write Role"
+  # Overwriting an object needs delete as well as create.
+  permissions = [
+    "storage.objects.create",
+    "storage.objects.delete",
+  ]
+}
+
+resource "google_project_iam_member" "redpanda_sql_iceberg_write" {
+  count   = var.enable_redpanda_sql ? 1 : 0
+  project = var.service_project_id
+  role    = google_project_iam_custom_role.redpanda_sql_iceberg_write[0].id
+  member  = "serviceAccount:${google_service_account.redpanda_sql[0].email}"
+
+  condition {
+    title       = "IcebergWritePrefixRestriction"
+    description = "Restrict Iceberg writes to the Redpanda SQL prefix of the Redpanda cloud storage bucket"
+    # No cluster ID before the cluster exists; the bucket is per cluster, so rpsql_ alone keeps broker paths out.
+    expression = "resource.name.startsWith('projects/_/buckets/${google_storage_bucket.redpanda_cloud_storage.name}/objects/rpsql_')"
+  }
+}
+
+# BigLake (Iceberg REST catalog on GCP) grants for the Redpanda SQL cluster SA.
+# Mirrors the grants Redpanda applies for Redpanda-managed clusters
+# BigLake warehouse bucket is already covered above (redpanda_sql_iceberg_storage/_write,
+# scoped to the redpanda_cloud_storage bucket) — no separate warehouse bucket is in play.
+
+# BigLake Editor — read and write the Iceberg REST catalog via the BigLake API.
+resource "google_project_iam_member" "redpanda_sql_biglake_editor" {
+  count   = var.enable_redpanda_sql ? 1 : 0
+  project = var.service_project_id
+  role    = "roles/biglake.editor"
   member  = "serviceAccount:${google_service_account.redpanda_sql[0].email}"
 
   lifecycle {
-    # The role is ForceNew; grant viewer before editor goes so catalog reads never lose access.
+    # The role is ForceNew; grant editor before viewer goes so catalog access is never lost.
     create_before_destroy = true
   }
 }
 
+# v1.0.5 named this binding redpanda_sql_biglake_viewer; earlier versions already use this address.
 moved {
-  from = google_project_iam_member.redpanda_sql_biglake_editor
-  to   = google_project_iam_member.redpanda_sql_biglake_viewer
+  from = google_project_iam_member.redpanda_sql_biglake_viewer
+  to   = google_project_iam_member.redpanda_sql_biglake_editor
 }
 
 # Service Usage Consumer — required by BigLake to interact with GCP services.
